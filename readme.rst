@@ -78,6 +78,27 @@ page content (as it exists in Discourse):
 - intro_explanation.txt
 - intro_reference.txt
 
+Dynamically created bits
+========================
+
+In the ``docs`` folder, when you run the ``extract-files.py`` script, the
+``file_list.csv`` file is created, which feeds the download script. It's a
+good idea to run this before any run of the download script, to make sure that
+any changes made to Discourse get picked up. 
+
+The ``download_docs.py`` script creates the 4 Diataxis landing pages, and any
+section/subsection pages (which I call "scaffolding") are created and put into the
+``subsections`` folder.
+
+Note that the names of the Diataxis sections are hard-coded in this file - if you
+run into build errors, specifically about these Diataxis pages, make sure that the
+slug names in your Discourse post match these: "tutorial", "how-to", "explanation", 
+"reference". 
+
+Otherwise, you can change the hard-coded names to match what you have in Discourse.
+Specifically - you will need to change the contents of the ``folders`` variable, which
+is defined near the top of the file in the STATIC VARIABLES section. 
+
 
 Get a file-list.csv file
 ========================
