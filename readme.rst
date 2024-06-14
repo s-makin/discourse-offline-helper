@@ -14,7 +14,7 @@ Discourse to provide your documentation.
 No API keys are required, since everything is pulled in from the public/raw 
 markdown.
 
-It assumes that your documentation pages are in standard markdown. 
+It assumes that your documentation pages are in standard markdown.
 
 The scaffolding required by Sphinx/RTD is created automatically by the same
 script that downloads the markdown content. 
@@ -122,6 +122,20 @@ In my example:
 
     cd docs
     python3 extract-files.py 11322 "Ubuntu Server Documentation"
+
+Expected navigation structure
+-----------------------------
+
+The script assumes that your navigation table is set up with the following
+levels for the different sections:
+* 0 - Index page only
+* 1 - Diataxis landing pages (tutorial, how-to, explanation, reference)
+* 2 - Can be sections or pages
+* 3 - Can be subsections or pages
+* 4 - Pages only
+
+Manually creating a file
+------------------------
 
 If you want to create it manually from a spreadsheet you're already using to
 track your Discourse docs, you should fill in the columns in this order:
