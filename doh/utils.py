@@ -14,7 +14,6 @@ def get_raw_markdown(url: str) -> str:
 
     :param url: Full URL of the raw markdown content. e.g. 'https://discourse.charmhub.io/raw/9729'
     :type url: str
-
     :return: Raw markdown content
     :rtype: str
     """
@@ -30,7 +29,6 @@ def parse_discourse_navigation_table(index_topic_markdown: str) -> list:
 
     :param index_topic_markdown: Raw markdown content of the index topic
     :type index_topic_markdown: str
-
     :return: List of dictionaries representing each row of the navtable
     E.g. [{'Level': '1', 'Path': 'slug-a', 'Navlink': '[Page A](/t/123)'}, {'Level': '2', 'Path': 'slug-b', 'Navlink': '[Page B](/t/124)'}]
     :rtype: list
@@ -66,9 +64,11 @@ def download_topic(path: str, url : str = None, raw_text : str = None) -> None:
     Download a discourse topic to a markdown file. Must use either `url` or `raw_text`.
 
     :param path: Relative path to the file. E.g. '/docs/topic'
+    :type path: str
     :param url: (Optional) URL of the raw discourse topic. E.g. 'https://discourse.charmhub.io/raw/9729'
+    :type url: str, optional
     :param raw_text: (Optional) Raw markdown content of a discourse topic.
-
+    :type raw_text: str, optional
     :rtype: None
     """
     text = ''

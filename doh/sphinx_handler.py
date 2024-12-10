@@ -4,122 +4,99 @@ import os
 
 class SphinxItem:
     discourse_topic_id : str
-    discourse_title: str
+    title: str
     path : Path
     ref = ''
     
-    def __init__(self, title, filepath, topic_id = '', isIndexTopic = False):
+    def __init__(self, title, filepath, topic_id = '', isHomeTopic = False, isFolder = False, isPage = False):
         self.discourse_topic_id = topic_id
-        self.discourse_title = title
 
+        self.title = title
         self.path = filepath
         self.ref = ''
 
-        self.isIndexTopic = isIndexTopic
+        self.isHomeTopic = isHomeTopic
+        self.isFolder = isFolder
+        self.isPage = isPage
 
 class SphinxHandler:
-    
-    # Initialize from discourse docs
+
     def __init__(self, discourse_docs: DiscourseHandler):
         self._discourse_docs = discourse_docs
 
-        # TODO (med): expose these private methods with a generate_index_pages() function for more transparency
-        self.__create_index_pages() 
-        self.__generate_items_list()
-
-    def __create_index_pages(self):
+    def update_index_pages(self):
         """
         Ensures there is an index page for each section.
 
-        First, rename home page in DOCS_LOCAL_PATH to `index.md`. 
-        Then, for each folder, if isTopic, rename the `.md` file to `index.md`.
+        Rename home page in DOCS_LOCAL_PATH to `index.md`. 
+        For each folder, if it has an identically named `.md` file, rename it to `index.md`. Otherwise, create it. 
+        """       
+        for item in self._discourse_docs._items:           
+            if item.isHomeTopic:
+                # rename to 'index.md'
+                new_path = item.filepath.parent / 'index.md'
+                os.rename(item.filepath.with_suffix('.md'), new_path)
+                item.update_filepath(new_path)
 
-        TODO: add diataxis section property to SphinxItem? avoid long ids
-        TODO: discard empty rows
-        """
-        logging.info("\nCreating missing index pages...")
-        for item in self._discourse_docs._items:
-            if item.isIndexTopic:
-                old_path = Path(conf['DOCS_LOCAL_PATH']) / item.filepath
-                new_path = old_path.parent / 'index'
-                os.rename(old_path.with_suffix('.md'), new_path.with_suffix('.md'))
-
-                updated_filepath = str(new_path)
-                updated_filepath = updated_filepath.replace(conf['DOCS_LOCAL_PATH'], "")
-                item.update_filepath(Path(updated_filepath))
-                logging.info(f"Renamed {old_path} to {new_path}")
+                logging.info(f"Renamed {item.filepath} to {new_path}")
             if item.isFolder:
-                if item.isTopic:
-                    filepath = Path(conf['DOCS_LOCAL_PATH']) / item.filepath
-                    old_path = filepath / filepath.name 
-                    new_path = old_path.parent / 'index'
-                    os.rename(old_path.with_suffix('.md'), new_path.with_suffix('.md'))
-                    logging.info(f"Renamed {old_path} to {new_path}")
+                if item.isTopic: 
+                    # already has index topic; just need to rename
+                    new_path = item.filepath.parent / 'index.md'
+                    os.rename(item.filepath.with_suffix('.md'), new_path.with_suffix('.md'))
+                    item.update_filepath(new_path)
 
-                    # Ugly things we gotta do because paths are poorly handled rn
-                    updated_filepath = str(new_path)
-                    updated_filepath = updated_filepath.replace(conf['DOCS_LOCAL_PATH'], "")
-                    item.update_filepath(Path(updated_filepath))
-                else:
-                    index_file = conf['DOCS_LOCAL_PATH'] / Path(item.filepath) / 'index'
+                    logging.info(f"Renamed {item.filepath} to {new_path}")
+                else: 
+                    # does not have an index topic, need to create
+                    index_file = item.filepath / 'index.md'
                     with open(index_file.with_suffix('.md'), 'w', encoding='utf-8') as f:
-                        f.write(f"\n\n# {item.title.title()}")
-                    logging.info(f"Created {index_file}.")
+                            f.write(f"\n")
 
                     new_item_row = {'Level': '1', 'Path': 'index', 'Navlink': '[Index]()'}
                     new_item = DiscourseItem(new_item_row)
-
-                    updated_filepath = str(index_file)
-                    updated_filepath = updated_filepath.replace(conf['DOCS_LOCAL_PATH'], "")
-                    new_item.update_filepath(Path(updated_filepath))
+                    new_item.update_filepath(index_file)
 
                     self._discourse_docs._items.append(new_item)
 
-    def __generate_items_list(self):
-        self.sphinx_items = []
+                    logging.info(f"Created {index_file}.")
+
+    def generate_h1_headings(self, replace_line = True):
+        """
+        Adds h1 heading to the first line.
+        :param: replace_line : If True, replaces the first line of the file (usually author/timestamp).
+                            If False, prepends before the first line of the file.
+        """
+
         for item in self._discourse_docs._items:
             if item.isTopic:
-                path = Path(conf['DOCS_LOCAL_PATH']) / item.filepath
+                    lines = []
+                    full_path = item.filepath.with_suffix('.md')
+                    with open(full_path, 'r', encoding='utf-8') as f:
+                        lines = f.readlines()
 
-                sphinx_item = SphinxItem(item.title, path.with_suffix('.md'), item.topic_id, item.isIndexTopic)
-                self.sphinx_items.append(sphinx_item)
+                    h1_header = ''
+                    if item.title == 'index':
+                        if item.isHomeTopic:
+                            continue
+                        # if it's an index page, its h1 header is the name of its parent folder, capitalized
+                        h1_header = f"# {item.filepath.parent.name.title()}\n" # 
+                    else:
+                        # normal pages use their title property extracted from the Navlink
+                        h1_header = f"# {item.title}\n"
 
-    # TODO (high): fix path bug
-    # TODO (low): fix some small inconsistencies in the generation (e.g. unwanted symbols)
-    # TODO (low): add config option to disable or customize
-    def generate_target_IDs(self):
-        """
-        Generates `target_id`.
+                    if replace_line:
+                        lines[0] = h1_header
+                    else:
+                        lines.insert(0, h1_header)
 
-        For each `.md` file, create a `target_id` based on filepath.
-        E.g. how-to/deploy.md -> (howto-deploy)=
-        E.g. reference/commands/deploy.md -> (reference-commands-deploy)=
-        """
-        for item in self.sphinx_items:
-            
-            path_parts = item.path.parts
-            if path_parts[-1] == 'index':
-                if len(path_parts) == 1: # top level index page is home
-                    item.ref = 'home'
-                else:
-                    item.ref = slugify(path_parts[-2]) # id for index pages is parent folder name
-            else:
-                item.ref = '-'.join(path_parts) # id for regular page is full path
-            
-            target_id = f"({item.ref})=\n"        
+                    with open(full_path, 'w', encoding='utf-8') as f:
+                        f.writelines(lines)
+                    
+                    logging.info(f"Added h1 header {h1_header} to {item.filepath}")
 
-            lines = []
-            full_path = item.path.with_suffix('.md')
-            with open(full_path, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-            
-            if lines:
-                lines[0] = target_id
-            else:
-                lines = target_id
-            with open(full_path, 'w', encoding='utf-8') as f:
-                f.writelines(lines)
 
+                            
     # TODO(low): add option to customize maxdepth. Currently hardcoded.
     # TODO(med): Fix inclusion of index files
     def generate_tocs(self):
@@ -127,11 +104,11 @@ class SphinxHandler:
         Generate `toctree` for each index file
         """
         logging.info("\nGenerating toctrees for index files...")
-        for item in self.sphinx_items:
-            if item.discourse_title == 'index' or item.isIndexTopic:
-                parent_path = item.path.parent
+        for item in self._discourse_docs._items:
+            if item.title == 'index' or item.isHomeTopic:
+                parent_path = item.filepath.parent
                 toc_list = []
-                if item.isIndexTopic:
+                if item.isHomeTopic:
                     toc_list = glob.glob(f"{parent_path}/*") # all files in docs path (depth 1)
                     for x in toc_list:
                         if '.md' in x:
@@ -154,14 +131,14 @@ class SphinxHandler:
                     toc_list = [x.replace(conf['DOCS_LOCAL_PATH'], "/") for x in toc_list]
                     toc_list = [x.replace(".md", "") for x in toc_list]
 
-                with open(item.path.with_suffix('.md'), 'a', encoding='utf-8') as f:
+                with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                     f.write("\n```{toctree}\n")
                     f.write(":hidden:\n")
                     f.write(":maxdepth: 2\n\n")
                     for x in toc_list:
                         f.write(f"{x}\n")
 
-                print(f"Created toctree for {item.path}")
+                print(f"Created toctree for {item.filepath}")
 
     def update_references(self):
         """
