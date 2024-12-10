@@ -1,5 +1,10 @@
 # README
 
+> [!NOTE]
+> This is under active development and is not ready for general use.
+> 
+> If you are interested, please get in touch with Andreia Velasco (@a-velasco)!
+
 The `doh` module:
 * Downloads discourse documentation locally into markdown files, conserving the original navigation structure
 * **(WIP)** Converts downloaded documentation into a Sphinx-compatible format
