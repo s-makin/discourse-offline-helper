@@ -2,17 +2,18 @@ import sys
 from discourse_handler import *
 from sphinx_handler import *
 
-# docsets that don't work yet (known fix)
 multipass = {'instance' : 'discourse.ubuntu.com',
-             'home_topic_id' : '8294'} # h1 headers
+             'home_topic_id' : '8294', 'generate_h1': True}
 landscape = {'instance' : 'discourse.ubuntu.com',
-             'home_topic_id' : '23070'} # h1 headers
+             'home_topic_id' : '23070', 'generate_h1': True}
 mir = {'instance' : 'discourse.ubuntu.com',
-       'home_topic_id' : '27559'} # h1 headers
+       'home_topic_id' : '27559', 'generate_h1': True}
+ubuntu_core = {'instance' : 'discourse.ubuntu.com',
+        'home_topic_id' : '19764', 'generate_h1': True}
+snap = {'instance' : 'forum.snapcraft.io',
+      'home_topic_id' : '11127', 'generate_h1': True}
 kafka = {'instance' : 'discourse.charmhub.io',
-         'home_topic_id' : '10288', 'generate_h1': False} # [details=Navigation]
-
-# docsets that work as expected
+         'home_topic_id' : '10288', 'generate_h1': False} # needs [details=Navigation]
 mongodb = {'instance' : 'discourse.charmhub.io',
            'home_topic_id' : '12461', 'generate_h1': False}
 opensearch = {'instance' : 'discourse.charmhub.io',
@@ -21,8 +22,8 @@ postgresql = {'instance' : 'discourse.charmhub.io',
               'home_topic_id' : '9710', 'generate_h1': False}
 
 #### input parameters ####
-docset = opensearch
-docs_local_path = 'docs/'
+docset = landscape
+docs_local_path = '/home/andreia/Documents/code/pdf-test-repo/docs/'
 
 if __name__ == '__main__':
     """
@@ -60,7 +61,8 @@ if __name__ == '__main__':
     
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
 
-    sphinx_docs.generate_h1_headings() # add h1 heading based on Navlink title
+    if conf['GENERATE_H1']:
+        sphinx_docs.generate_h1_headings() # add h1 heading based on Navlink title
 
     sphinx_docs.generate_tocs()
 

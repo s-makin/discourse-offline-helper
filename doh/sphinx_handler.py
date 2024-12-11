@@ -51,7 +51,10 @@ class SphinxHandler:
                     # does not have an index topic, need to create
                     index_file = item.filepath / 'index.md'
                     with open(index_file.with_suffix('.md'), 'w', encoding='utf-8') as f:
-                            f.write(f"\n")
+                            if conf['GENERATE_H1']:
+                                f.write(f"\n")
+                            else:
+                                f.write(f"# {item.filepath.name.title()}\n")
 
                     new_item_row = {'Level': '1', 'Path': 'index', 'Navlink': '[Index]()'}
                     new_item = DiscourseItem(new_item_row)
@@ -64,8 +67,9 @@ class SphinxHandler:
     def generate_h1_headings(self, replace_line = True):
         """
         Adds h1 heading to the first line.
+
         :param: replace_line : If True, replaces the first line of the file (usually author/timestamp).
-                            If False, prepends before the first line of the file.
+                If False, prepends before the first line of the file.
         """
 
         for item in self._discourse_docs._items:
@@ -80,7 +84,7 @@ class SphinxHandler:
                         if item.isHomeTopic:
                             continue
                         # if it's an index page, its h1 header is the name of its parent folder, capitalized
-                        h1_header = f"# {item.filepath.parent.name.title()}\n" # 
+                        h1_header = f"# {item.filepath.parent.name.title()}\n"
                     else:
                         # normal pages use their title property extracted from the Navlink
                         h1_header = f"# {item.title}\n"
@@ -94,11 +98,9 @@ class SphinxHandler:
                         f.writelines(lines)
                     
                     logging.info(f"Added h1 header {h1_header} to {item.filepath}")
-
-
                             
-    # TODO(low): add option to customize maxdepth. Currently hardcoded.
-    # TODO(med): Fix inclusion of index files
+    # TODO: add option to customize maxdepth. Currently hardcoded.
+    # TODO: use sphinx glob directive instead of doing it myself
     def generate_tocs(self):
         """
         Generate `toctree` for each index file
