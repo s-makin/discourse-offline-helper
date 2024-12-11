@@ -5,21 +5,79 @@ class SphinxHandler:
     def __init__(self, discourse_docs: DiscourseHandler):
         self._discourse_docs = discourse_docs
 
-    def clean_discourse_metadata(self):
+    def remove_discourse_metadata(self):
+        """
+        Removes timestamp and comments from the discourse topics.
+        
+        The metadata on the first line is in the format `user | timestamp | #`.
+        The comments are expected to be separated by a delimiter `-------------------------`.
+
+        :raises ValueError: If the file is empty.
+        """
         for item in self._discourse_docs._items:
             if item.isTopic:
                 lines = []
-                full_path = item.filepath.with_suffix('.md')
-                with open(full_path, 'r', encoding='utf-8') as f:
+                with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
                     lines = f.readlines()
-                
-                first_line = lines[0]
-                lines.pop(0) # remove first line containing `user | timestamp | #`
 
-                with open(full_path, 'w', encoding='utf-8') as f:
-                        f.writelines(lines)
+                if len(lines) == 0:
+                    raise ValueError(f"File {item.filepath} is empty.")
                 
-                logging.debug(f"Removed line '{first_line}' from {item.filepath}")
+                # remove all lines after the delimiter in case there are comments
+                content_before_comments = []
+                comment_delimiter = '-------------------------\n'
+                for line in lines:
+                    if comment_delimiter in line:
+                        break
+                    content_before_comments.append(line)
+
+                # remove first line containing `user | timestamp | #`
+                content_before_comments.pop(0)
+                
+                with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
+                        f.writelines(content_before_comments)
+
+    def replace_discourse_markdown(self):
+        """
+        Replaces markdown elements with Discourse syntax (i.e. square brackets) and replaces them with Sphinx/RTD or regular markdown equivalents.
+        
+        The following replacements are made:
+        * [note] [/note] -> .. note::
+        * [details] [/details] -> .. details::
+        """
+        pass
+
+    def __link_replacement(self, match):
+        text = match.group(1)
+        topic_id = match.group(2)
+        
+        new_value = ''
+        for item in self._discourse_docs._items:
+            if item.topic_id == topic_id:
+                new_value = item.filepath.relative_to(conf['DOCS_LOCAL_PATH'])
+        
+        return f"[{text}](/{new_value})"
+
+    def update_links(self):
+        """
+        Replaces local discourse links with local path to the equivalent file.
+        """
+        for item in self._discourse_docs._items:
+            if item.isTopic:
+                lines = []
+                with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+
+                updated_lines = []
+                pattern = r"\[([^\]]+)]\(/t/(\d+)\)"
+                for line in lines:
+                    new_line = re.sub(pattern, self.__link_replacement, line)
+                    updated_lines.append(new_line)
+
+                with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
+                        f.writelines(updated_lines)
+
+
 
     def update_index_pages(self):
         """
@@ -121,11 +179,7 @@ class SphinxHandler:
 
                 print(f"Created toctree for {item.filepath}")
 
-    def update_references(self):
-        """
-        Replaces local discourse links with sphinx reference to the equivalent file.
-        """
-        pass
+
 
     def update_images(self):
         pass

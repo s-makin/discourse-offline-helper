@@ -59,7 +59,9 @@ if __name__ == '__main__':
     # #### Step 2. Convert local discourse docs to Sphinx/RTD (markdown only) ####
     sphinx_docs = SphinxHandler(discourse_docs)
 
-    sphinx_docs.clean_discourse_metadata()
+    sphinx_docs.remove_discourse_metadata()
+
+    sphinx_docs.update_links()
     
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
 
@@ -67,9 +69,6 @@ if __name__ == '__main__':
         sphinx_docs.generate_h1_headings() # add h1 heading based on Navlink title
 
     sphinx_docs.generate_tocs()
-
-    # # TODO (high)
-    # sphinx_docs.update_references() # does nothing
 
     # # TODO (high)
     # sphinx_docs.update_images() # does nothing
