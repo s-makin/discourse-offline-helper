@@ -2,7 +2,9 @@ from discourse_handler import *
 import os
 
 class SphinxHandler:
-    def __init__(self, discourse_docs: DiscourseHandler):
+    def __init__(self, discourse_docs: DiscourseHandler, configuration: dict) -> None:
+        self.config = configuration
+
         self._discourse_docs = discourse_docs
 
     def remove_discourse_metadata(self):
@@ -37,7 +39,7 @@ class SphinxHandler:
                 with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
                         f.writelines(content_before_comments)
 
-    def replace_discourse_markdown(self):
+    def replace_discourse_syntax(self):
         """
         Replaces markdown elements with Discourse syntax (i.e. square brackets) and replaces them with Sphinx/RTD or regular markdown equivalents.
         
@@ -69,7 +71,7 @@ class SphinxHandler:
         new_value = ''
         for item in self._discourse_docs._items:
             if item.topic_id == topic_id:
-                new_value = item.filepath.relative_to(conf['DOCS_LOCAL_PATH'])
+                new_value = item.filepath.relative_to(self.config['docs_directory'])
         
         return f"[{text}](/{new_value})"
 
@@ -119,13 +121,13 @@ class SphinxHandler:
                     # does not have an index topic, need to create
                     index_file = item.filepath / 'index.md'
                     with open(index_file.with_suffix('.md'), 'w', encoding='utf-8') as f:
-                            if conf['GENERATE_H1']:
+                            if self.config['generate_h1']:
                                 f.write(f"\n")
                             else:
                                 f.write(f"# {item.filepath.name.title()}\n")
 
                     new_item_row = {'Level': '1', 'Path': 'index', 'Navlink': '[Index]()'}
-                    new_item = DiscourseItem(new_item_row)
+                    new_item = DiscourseItem(new_item_row, self.config)
                     new_item.update_filepath(index_file)
 
                     self._discourse_docs._items.append(new_item)
@@ -167,7 +169,6 @@ class SphinxHandler:
                     
                     logging.info(f"Added h1 header {h1_header} to {item.filepath}")
                             
-    # TODO: add option to customize maxdepth. Currently hardcoded.
     def generate_tocs(self):
         """
         Generate `toctree` for each index file

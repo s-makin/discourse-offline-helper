@@ -33,18 +33,23 @@ Run `doh/main.py`
 ```
 python3 doh/main.py
 ```
-## configuration
+## `config.yaml` parameters
 
-To configure the inputs, open `main.py` and edit the input parameters on [line 24](doh/main.py#L24): `docset` and `docs_local_path`.
+`docs_local_path`: Target folder for downloaded docs.
 
-For example, to download MongoDB docs directly to my test sphinx repo, I set:
-```
-docset = mongodb
-docs_local_path = '/home/andreia/Documents/pdf-test-repo/docs/'
-```
+`discourse_instance`: Discourse instance without 'http:://'
 
->[!NOTE]
-> Before re-running the script on a different docset, manually delete the pre-existing files.
->
-> The script overwrites existing files when re-downloading them.
-> This means that if you run it with a different docset to the same target folder, the previous docset's files will remain there and mix with the new.
+`home_topic_id`: Index/overview/home topic ID without '/t/'
+This would be the discourse topic that contains the Navigation table.
+
+`use_title_as_filename`: Determines whether filenames get generated with the navtable 'Path' or with the title extracted from the 'Navlink'.
+E.g. 
+| Level   | Path | Navlink |
+|---------|------|---------|
+| 1 | slug-a   | [Category A](/t/123) |
+
+if True (default), the filename will be `category-a.md`
+if False, the filename will be `slug-a.md`
+
+`generate_h1`: Whether or not to generate H1 headers automatically. 
+Only necessary if your pages don't have a h1 header already.

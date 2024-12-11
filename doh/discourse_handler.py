@@ -4,7 +4,6 @@ from pathlib import Path
 import logging
 import re
 from utils import *
-from conf import *
 
 class DiscourseItem:
     """
@@ -35,7 +34,9 @@ class DiscourseItem:
     isFolder = False
     isTopic = True
 
-    def __init__(self, navtable_row: dict) -> None:
+    def __init__(self, navtable_row: dict, configuration) -> None:
+
+        self.config = configuration
 
         # Get values from Navigation table row
         if navtable_row['Level']:
@@ -56,7 +57,7 @@ class DiscourseItem:
         # Get title, topic ID, and URL from the 'Navlink' column
         self.__parse_navtable_navlink()
 
-        if self.topic_id == conf['HOME_TOPIC_ID']:
+        if self.topic_id == self.config['home_topic_id']:
             self.isHomeTopic = True
 
         # Set filename parameter
@@ -71,14 +72,14 @@ class DiscourseItem:
         """
         self.filepath = path
         self.filename = path.stem
-        if conf['USE_TITLE_AS_FILENAME']:
+        if self.config['use_title_as_filename']:
             self.title = self.filename
 
     def __parse_filename(self):
         """
         Sets the filename based on the configuration.
         """
-        if conf['USE_TITLE_AS_FILENAME'] or self.navtable_path == '':
+        if self.config['use_title_as_filename'] or self.navtable_path == '':
             self.filename = slugify(self.title)
         else:
             self.filename = slugify(self.navtable_path)
@@ -103,7 +104,7 @@ class DiscourseItem:
 
         if link == '':
             return
-        elif link.startswith("http") and conf['DISCOURSE_INSTANCE'] not in link:
+        elif link.startswith("http") and self.config['instance'] not in link:
             logging.debug(
                 f"This row has an external link. This item will be ignored.")
             self.isValid = False
@@ -111,7 +112,7 @@ class DiscourseItem:
 
         # Extract topic ID number
         self.topic_id = link.split("/")[-1]
-        self.url = f"https://{conf['DISCOURSE_INSTANCE']}/raw/{self.topic_id}"
+        self.url = f"https://{self.config['instance']}/raw/{self.topic_id}"
         
 class DiscourseHandler:
     """
@@ -122,7 +123,8 @@ class DiscourseHandler:
     :type home_topic_id: str
     """
 
-    def __init__(self):
+    def __init__(self, configuration: dict):
+        self.config = configuration
 
         self._items = []
         self.__generate_items_list()
@@ -131,7 +133,9 @@ class DiscourseHandler:
         """
         Populates :param self._items: with :class:`DiscourseItem` objects generated from the navigation table.
         """
-        self._index_topic_url = f"https://{conf['DISCOURSE_INSTANCE']}/raw/{conf['HOME_TOPIC_ID']}"
+        if not self.config['home_topic_id'].isdigit():
+            raise ValueError(f"Index topic ID '{self.config['home_topic_id']}' contains non-digit characters. Make sure to exclude '/t/'.")
+        self._index_topic_url = f"https://{self.config['instance']}/raw/{self.config['home_topic_id']}"
         index_topic_raw = get_raw_markdown(self._index_topic_url)
 
         logging.info(f"Parsing navigation table in index topic {self._index_topic_url}...")
@@ -140,7 +144,7 @@ class DiscourseHandler:
         logging.info(f"Generating discourse navigation items...")
         for row in navtable_raw:
             logging.debug(f"  {row}")
-            item = DiscourseItem(row)
+            item = DiscourseItem(row, self.config)
             if not item.isValid:
                 logging.debug(f"Item is not valid. Skipping.")
                 continue
@@ -148,11 +152,11 @@ class DiscourseHandler:
 
         # If index/home page was not in the navtable, add to items manually
         # TODO: expect Index as title or path
-        index_topic = [x for x in self._items if x.topic_id == conf['HOME_TOPIC_ID']]
+        index_topic = [x for x in self._items if x.topic_id == self.config['home_topic_id']]
         if not index_topic:
-            index_navlink = f"[Index](/t/{conf['HOME_TOPIC_ID']})"
+            index_navlink = f"[Index](/t/{self.config['home_topic_id']})"
             index_row = {'Level': '1', 'Path': 'index', 'Navlink': index_navlink}
-            self._items.append(DiscourseItem(index_row))
+            self._items.append(DiscourseItem(index_row, self.config))
 
     def calculate_item_type(self) -> None:
         """
@@ -212,9 +216,9 @@ class DiscourseHandler:
 
                 # If a topic is also a folder, append filename such that topic.md gets downloaded into /topic/topic.md
                 if self._items[i].isTopic and self._items[i].isFolder:
-                    self._items[i].filepath = conf['DOCS_LOCAL_PATH'] / path / path.name
+                    self._items[i].filepath = self.config['docs_directory'] / path / path.name
                 else:
-                    self._items[i].filepath = conf['DOCS_LOCAL_PATH'] / path
+                    self._items[i].filepath = self.config['docs_directory'] / path
                 
                 logging.debug(f"DiscourseHandler: __calculate_filepaths: '{self._items[i].filepath}")
 

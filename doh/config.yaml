@@ -1,0 +1,46 @@
+---
+multipass:
+  instance: discourse.ubuntu.com
+  home_topic_id: "8294"
+  generate_h1: true
+  use_title_as_filename: true
+landscape:
+  instance: discourse.ubuntu.com
+  home_topic_id: "23070"
+  generate_h1: true
+  use_title_as_filename: true
+mir:
+  instance: discourse.ubuntu.com
+  home_topic_id: "27559"
+  generate_h1: true
+  use_title_as_filename: true
+ubuntu_core:
+  instance: discourse.ubuntu.com
+  home_topic_id: "19764"
+  generate_h1: true
+  use_title_as_filename: true
+snap:
+  instance: forum.snapcraft.io
+  home_topic_id: "11127"
+  generate_h1: true
+  use_title_as_filename: true
+kafka:
+  instance: discourse.charmhub.io
+  home_topic_id: "10288"
+  generate_h1: false
+  use_title_as_filename: true
+mongodb:
+  instance: discourse.charmhub.io
+  home_topic_id: "12461"
+  generate_h1: false
+  use_title_as_filename: true
+opensearch:
+  instance: discourse.charmhub.io
+  home_topic_id: "9729"
+  generate_h1: false
+  use_title_as_filename: true
+postgresql:
+  instance: discourse.charmhub.io
+  home_topic_id: "9710"
+  generate_h1: false
+  use_title_as_filename: true
