@@ -100,45 +100,27 @@ class SphinxHandler:
                     logging.info(f"Added h1 header {h1_header} to {item.filepath}")
                             
     # TODO: add option to customize maxdepth. Currently hardcoded.
-    # TODO: use sphinx glob directive instead of doing it myself
     def generate_tocs(self):
         """
         Generate `toctree` for each index file
         """
+        toctree_directives = f"\n```{{toctree}}\n:hidden:\n:titlesonly:\n:maxdepth: 2\n:glob:\n\n"
         logging.info("\nGenerating toctrees for index files...")
         for item in self._discourse_docs._items:
             if item.title == 'index' or item.isHomeTopic:
-                parent_path = item.filepath.parent
-                toc_list = []
                 if item.isHomeTopic:
-                    toc_list = glob.glob(f"{parent_path}/*") # all files in docs path (depth 1)
-                    for x in toc_list:
-                        if '.md' in x:
-                            toc_list.remove(x)
-                    toc_list = [x.replace(str(parent_path), "") for x in toc_list] # remove parent
-                    toc_list = [x + '/index' for x in toc_list] # format
-                    toc_list.insert(0, 'self')
+                    with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
+                        f.write(toctree_directives)
+                        f.write("self\n")
+                        f.write("/tutorial/index\n")
+                        f.write("/how-to/index\n")
+                        f.write("/reference/index\n")
+                        f.write("/explanation/index\n")
                 else:
-                    toc_list = glob.glob(f"{str(parent_path)}/*") # all files in docs path (depth 1)
-                    file_list = []
-                    folder_list = []
-                    for x in toc_list:
-                        if '.md' in x:
-                            file_list.append(x)
-                        else:
-                            x += '/index'
-                            folder_list.append(x)
-
-                    toc_list = file_list + folder_list
-                    toc_list = [x.replace(conf['DOCS_LOCAL_PATH'], "/") for x in toc_list]
-                    toc_list = [x.replace(".md", "") for x in toc_list]
-
-                with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
-                    f.write("\n```{toctree}\n")
-                    f.write(":hidden:\n")
-                    f.write(":maxdepth: 2\n\n")
-                    for x in toc_list:
-                        f.write(f"{x}\n")
+                    with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
+                        f.write(toctree_directives)
+                        f.write("*")
+                        f.write("*/index")
 
                 print(f"Created toctree for {item.filepath}")
 
