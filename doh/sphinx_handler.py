@@ -42,10 +42,25 @@ class SphinxHandler:
         Replaces markdown elements with Discourse syntax (i.e. square brackets) and replaces them with Sphinx/RTD or regular markdown equivalents.
         
         The following replacements are made:
-        * [note] [/note] -> .. note::
-        * [details] [/details] -> .. details::
+        * [note] [/note] -> ```{note}
+        * more replacements to be implemented
         """
-        pass
+        for item in self._discourse_docs._items:
+            if item.isTopic:
+                lines = []
+                with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+
+                updated_lines = []
+                for line in lines:
+                    line = re.sub(r'\[note.*?caution.*?\]', r'```{caution}', line)  # Matches [note="caution"] and replaces with ```{caution}
+                    line = re.sub(r'\[note\]', r'```{note}', line)  # Matches [note] and replaces with ```{note}
+                    line = re.sub(r'\[/note\]', r'```', line)  # Matches [/note] and replaces with ```
+
+                    updated_lines.append(line)
+
+                with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
+                        f.writelines(updated_lines)
 
     def __link_replacement(self, match):
         text = match.group(1)
@@ -76,8 +91,6 @@ class SphinxHandler:
 
                 with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
                         f.writelines(updated_lines)
-
-
 
     def update_index_pages(self):
         """
@@ -179,7 +192,3 @@ class SphinxHandler:
 
                 print(f"Created toctree for {item.filepath}")
 
-
-
-    def update_images(self):
-        pass
