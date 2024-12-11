@@ -22,7 +22,7 @@ postgresql = {'instance' : 'discourse.charmhub.io',
               'home_topic_id' : '9710', 'generate_h1': False}
 
 #### input parameters ####
-docset = landscape
+docset = opensearch
 docs_local_path = '/home/andreia/Documents/code/pdf-test-repo/docs/'
 
 if __name__ == '__main__':
@@ -58,6 +58,8 @@ if __name__ == '__main__':
 
     # #### Step 2. Convert local discourse docs to Sphinx/RTD (markdown only) ####
     sphinx_docs = SphinxHandler(discourse_docs)
+
+    sphinx_docs.clean_discourse_metadata()
     
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
 

@@ -1,28 +1,25 @@
 from discourse_handler import *
-import glob
 import os
 
-class SphinxItem:
-    discourse_topic_id : str
-    title: str
-    path : Path
-    ref = ''
-    
-    def __init__(self, title, filepath, topic_id = '', isHomeTopic = False, isFolder = False, isPage = False):
-        self.discourse_topic_id = topic_id
-
-        self.title = title
-        self.path = filepath
-        self.ref = ''
-
-        self.isHomeTopic = isHomeTopic
-        self.isFolder = isFolder
-        self.isPage = isPage
-
 class SphinxHandler:
-
     def __init__(self, discourse_docs: DiscourseHandler):
         self._discourse_docs = discourse_docs
+
+    def clean_discourse_metadata(self):
+        for item in self._discourse_docs._items:
+            if item.isTopic:
+                lines = []
+                full_path = item.filepath.with_suffix('.md')
+                with open(full_path, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                
+                first_line = lines[0]
+                lines.pop(0) # remove first line containing `user | timestamp | #`
+
+                with open(full_path, 'w', encoding='utf-8') as f:
+                        f.writelines(lines)
+                
+                logging.debug(f"Removed line '{first_line}' from {item.filepath}")
 
     def update_index_pages(self):
         """
@@ -119,15 +116,14 @@ class SphinxHandler:
                 else:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                         f.write(toctree_directives)
-                        f.write("*")
-                        f.write("*/index")
+                        f.write("*\n")
+                        f.write("*/index\n")
 
                 print(f"Created toctree for {item.filepath}")
 
     def update_references(self):
         """
         Replaces local discourse links with sphinx reference to the equivalent file.
-
         """
         pass
 

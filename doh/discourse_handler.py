@@ -218,8 +218,6 @@ class DiscourseHandler:
                 
                 logging.debug(f"DiscourseHandler: __calculate_filepaths: '{self._items[i].filepath}")
 
-
-
     def download(self) -> None:
         """
         Downloads all topics from their URLs into the paths calculated by :meth:`calculate_filepaths`.

@@ -20,7 +20,7 @@ git clone git@github.com:a-velasco/offline-helper.git
 cd offline-helper
 ```
 
-Start a virtual environment (called `demo` in the example below):
+Start a virtual environment (called `demo` in the commands below):
 ```
 python3 -m venv demo
 source demo/bin/activate
