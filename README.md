@@ -31,13 +31,26 @@ python3 -m pip install -r requirements.txt
 ```
 Run `doh/main.py`
 ```
-python3 doh/main.py
+python3 doh/main.py -docset opensearch
 ```
+
+## try it on other doc sets
+There are currently several pre-configured Discourse documentation sets that can be passed in as `-docset` arguments:
+* multipass
+* landscape
+* mir
+* ubuntu_core
+* snap
+* kafka
+* mongodb
+* opensearch
+* postgresql
+
+To view their settings or add a new one, see the [`config.yaml`](doh/config.yaml) file.
+
 ## `config.yaml` parameters
 
-`docs_local_path`: Target folder for downloaded docs.
-
-`discourse_instance`: Discourse instance without 'http:://'
+`discourse_instance`: Discourse instance without 'http://'
 
 `home_topic_id`: Index/overview/home topic ID without '/t/'
 This would be the discourse topic that contains the Navigation table.
