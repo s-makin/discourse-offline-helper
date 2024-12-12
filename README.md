@@ -80,9 +80,10 @@ If False, the filename will be `slug-a.md`
 `generate_h1`: Whether or not to generate H1 headers automatically. Only necessary if your pages don't have a h1 header already.
 
 ### Documentation requirements
-Level 0 vs. Level 1
-- 0 accepted for some high level pages but diataxis categories should be level 1, and contents should be level 2 etc
 
+**Navigation table** is wrapped in `[details=Navigation]` and preceded by `# Navigation` h1 heading. 
+
+E.g.
 ```
 # Navigation
 
@@ -91,10 +92,17 @@ Level 0 vs. Level 1
 | Level   | Path | Navlink |
 |---------|------|---------|
 | 1 | slug-a   | [Category A](/t/123) |
-| 1 | slug-a   | [Category A](/t/this-is-ok/123) |
+...
 
 [details=Navigation]
 ```
+
+**Level**: (WIP - expected level structure)
+
+**Path**: (WIP - can be empty, unless config `use_title_as_filename` is false)
+
+**Navlink**: (WIP)
+
 ### Polish or troubleshoot your new Sphinx docs
 
 Once you've run the script and built the HTML docs, you'll probably notice a few things that still need some polishing - maybe some formatting is off or the navigation doesn't show up as expected.

@@ -7,7 +7,7 @@ class SphinxHandler:
 
         self._discourse_docs = discourse_docs
 
-    def remove_discourse_metadata(self):
+    def remove_discourse_metadata(self, first_line = True, comments = True):
         """
         Removes timestamp and comments from the discourse topics.
         
@@ -16,6 +16,7 @@ class SphinxHandler:
 
         :raises ValueError: If the file is empty.
         """
+        logging.info("\nRemoving Discourse metadata...")
         for item in self._discourse_docs._items:
             if item.isTopic:
                 lines = []
@@ -25,16 +26,20 @@ class SphinxHandler:
                 if len(lines) == 0:
                     raise ValueError(f"File {item.filepath} is empty.")
                 
-                # remove all lines after the delimiter in case there are comments
-                content_before_comments = []
-                comment_delimiter = '-------------------------\n'
-                for line in lines:
-                    if comment_delimiter in line:
-                        break
-                    content_before_comments.append(line)
+                if comments:
+                    # remove all lines after the `comment_delimiter`
+                    content_before_comments = []
+                    comment_delimiter = '-------------------------\n'
+                    for line in lines:
+                        if comment_delimiter in line:
+                            break
+                        content_before_comments.append(line)
 
-                # remove first line containing `user | timestamp | #`
-                content_before_comments.pop(0)
+                    lines = content_before_comments
+
+                if first_line:
+                    # remove first line of the file, assumed to be `user <username> | <timestamp> | #<number>`
+                    content_before_comments.pop(0)
                 
                 with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
                         f.writelines(content_before_comments)
@@ -47,6 +52,7 @@ class SphinxHandler:
         * [note] [/note] -> ```{note}
         * more replacements to be implemented
         """
+        logging.info("\nReplacing discourse markdown syntax...")
         for item in self._discourse_docs._items:
             if item.isTopic:
                 lines = []
@@ -79,6 +85,7 @@ class SphinxHandler:
         """
         Replaces local discourse links with local path to the equivalent file.
         """
+        logging.info("\nUpdating internal links...")
         for item in self._discourse_docs._items:
             if item.isTopic:
                 lines = []
@@ -100,7 +107,9 @@ class SphinxHandler:
 
         Rename home page in DOCS_LOCAL_PATH to `index.md`. 
         For each folder, if it has an identically named `.md` file, rename it to `index.md`. Otherwise, create it. 
-        """       
+        """
+        logging.info("\nUpdating index pages...")
+
         for item in self._discourse_docs._items:           
             if item.isHomeTopic:
                 # rename to 'index.md'
@@ -108,7 +117,7 @@ class SphinxHandler:
                 os.rename(item.filepath.with_suffix('.md'), new_path)
                 item.update_filepath(new_path)
 
-                logging.info(f"Renamed {item.filepath} to {new_path}")
+                logging.debug(f"Renamed {item.filepath} to {new_path}")
             if item.isFolder:
                 if item.isTopic: 
                     # already has index topic; just need to rename
@@ -116,7 +125,7 @@ class SphinxHandler:
                     os.rename(item.filepath.with_suffix('.md'), new_path.with_suffix('.md'))
                     item.update_filepath(new_path)
 
-                    logging.info(f"Renamed {item.filepath} to {new_path}")
+                    logging.debug(f"Renamed {item.filepath} to {new_path}")
                 else: 
                     # does not have an index topic, need to create
                     index_file = item.filepath / 'index.md'
@@ -141,6 +150,7 @@ class SphinxHandler:
         :param: replace_line : If True, replaces the first line of the file (usually author/timestamp).
                 If False, prepends before the first line of the file.
         """
+        logging.info("\nAdding h1 headings...")
 
         for item in self._discourse_docs._items:
             if item.isTopic:
@@ -149,32 +159,33 @@ class SphinxHandler:
                     with open(full_path, 'r', encoding='utf-8') as f:
                         lines = f.readlines()
 
-                    h1_header = ''
+                    h1_heading = ''
                     if item.title == 'index':
                         if item.isHomeTopic:
                             continue
                         # if it's an index page, its h1 header is the name of its parent folder, capitalized
-                        h1_header = f"# {item.filepath.parent.name.title()}\n"
+                        h1_heading = f"# {item.filepath.parent.name.title()}\n"
                     else:
                         # normal pages use their title property extracted from the Navlink
-                        h1_header = f"# {item.title}\n"
+                        h1_heading = f"# {item.title}\n"
 
                     if replace_line:
-                        lines[0] = h1_header
+                        lines[0] = h1_heading
                     else:
-                        lines.insert(0, h1_header)
+                        lines.insert(0, h1_heading)
 
                     with open(full_path, 'w', encoding='utf-8') as f:
                         f.writelines(lines)
                     
-                    logging.info(f"Added h1 header {h1_header} to {item.filepath}")
+                    logging.info(f"Added h1 heading {h1_heading} to {item.filepath}")
                             
     def generate_tocs(self):
         """
         Generate `toctree` for each index file
         """
-        toctree_directives = f"\n```{{toctree}}\n:hidden:\n:titlesonly:\n:maxdepth: 2\n:glob:\n\n"
         logging.info("\nGenerating toctrees for index files...")
+
+        toctree_directives = f"\n```{{toctree}}\n:hidden:\n:titlesonly:\n:maxdepth: 2\n:glob:\n\n"
         for item in self._discourse_docs._items:
             if item.title == 'index' or item.isHomeTopic:
                 if item.isHomeTopic:

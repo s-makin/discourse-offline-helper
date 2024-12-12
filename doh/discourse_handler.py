@@ -138,15 +138,15 @@ class DiscourseHandler:
         self._index_topic_url = f"https://{self.config['instance']}/raw/{self.config['home_topic_id']}"
         index_topic_raw = get_raw_markdown(self._index_topic_url)
 
-        logging.info(f"Parsing navigation table in index topic {self._index_topic_url}...")
+        logging.info(f"\nParsing navigation table in index topic {self._index_topic_url}...")
         navtable_raw = parse_discourse_navigation_table(index_topic_raw)
 
-        logging.info(f"Generating discourse navigation items...")
+        logging.info(f"\nGenerating discourse navigation items...")
         for row in navtable_raw:
             logging.debug(f"  {row}")
             item = DiscourseItem(row, self.config)
             if not item.isValid:
-                logging.debug(f"Item is not valid. Skipping.")
+                logging.debug(f"Row {row} is not valid. Skipping.")
                 continue
             self._items.append(item)
 
@@ -219,17 +219,16 @@ class DiscourseHandler:
                     self._items[i].filepath = self.config['docs_directory'] / path / path.name
                 else:
                     self._items[i].filepath = self.config['docs_directory'] / path
-                
-                logging.debug(f"DiscourseHandler: __calculate_filepaths: '{self._items[i].filepath}")
 
     def download(self) -> None:
         """
         Downloads all topics from their URLs into the paths calculated by :meth:`calculate_filepaths`.
         """
+        logging.debug("")
         for item in self._items:
             if item.isTopic:
                 logging.debug(
-                    f"Downloading '{item.title}' to '{item.filepath}' from URL '{item.url}'...")
+                    f"\nDownloading '{item.title}' to '{item.filepath}' from URL '{item.url}'...")
                 
                 item.filepath.parent.mkdir(parents=True, exist_ok=True) # make sure parent folders exist
                 if item.filepath.exists(): # if file already exists, remove
