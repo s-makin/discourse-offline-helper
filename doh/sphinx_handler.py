@@ -181,10 +181,10 @@ class SphinxHandler:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                         f.write(toctree_directives)
                         f.write("self\n")
-                        f.write("/tutorial/index\n")
-                        f.write("/how-to/index\n")
-                        f.write("/reference/index\n")
-                        f.write("/explanation/index\n")
+                        f.write("/tutorial*/index\n")
+                        f.write("/how*/index\n")
+                        f.write("/reference*/index\n")
+                        f.write("/explanation*/index\n")
                 else:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                         f.write(toctree_directives)
