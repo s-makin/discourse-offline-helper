@@ -1,4 +1,4 @@
-# README
+# discourse-offline-helper (doh)
 
 > [!NOTE]
 > This is under active development and is not ready for general use.
@@ -6,13 +6,15 @@
 > If you are interested, please get in touch with Andreia Velasco! (@avgomes on Mattermost)
 
 The `doh` module:
-* Downloads discourse documentation locally into markdown files, conserving the original navigation structure
-* **(WIP)** Converts downloaded documentation into a Sphinx-compatible format
+* Downloads discourse documentation locally into markdown files, conserving the navigation structure
+* Converts downloaded documentation into a Sphinx-compatible format. This includes:
+  * creating or renaming missing index files
+  * replacing hyperlinks to internal discourse pages with the local filepath (e.g. `[Some guide](/t/123)` becomes `[Some guide](how-to/some-guide)`)
+  * creating h1 headers if the Discourse pages don't already have them
+  * appending a simple toctree to index pages (alphabetical order, `maxdepth 2`)
 
 ## demo
-The following instructions will show you how to set up your environment and run the script. 
-
-By default, it'll download a demo documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)) into a local `'/docs'` folder:
+The following instructions will show you how to set up your environment and run the script on a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)) into a local `'/docs'` folder:
 
 Clone the repo and enter its root directory:
 ```
@@ -35,20 +37,23 @@ python3 doh/main.py -docset opensearch
 ```
 
 ## try it on other doc sets
+
 There are currently several pre-configured Discourse documentation sets that can be passed in as `-docset` arguments:
-* multipass
-* landscape
-* mir
-* ubuntu_core
-* snap
-* kafka
-* mongodb
-* opensearch
-* postgresql
+* `multipass`
+* `landscape`
+* `mir`
+* `ubuntu_core`
+* `snap`
+* `kafka`
+* `mongodb`
+* `opensearch`
+* `postgresql`
 
-To view their settings or add a new one, see the [`config.yaml`](doh/config.yaml) file.
+## configure a new doc set 
 
-## `config.yaml` parameters
+To edit an existing doc set or create a new one, see the [`config.yaml`](doh/config.yaml) file.
+
+### `config.yaml` parameters
 
 `discourse_instance`: Discourse instance without 'http://'
 
