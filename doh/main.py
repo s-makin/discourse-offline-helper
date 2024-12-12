@@ -6,6 +6,22 @@ from sphinx_handler import *
 
 CONFIG_FILE = 'doh/config.yaml'
 
+test_navtable = \
+"""[details=Navigation]
+
+| Level | Path | Navlink |
+|-------|------|---------|
+| 1 | tutorial | [Tutorial](/t/9722) |
+| 2 | t-set-up | [1. Set up the environment](/t/9724) |
+| 1 | how-to | [How To]() |
+| 2 | h-deploy | [Deploy]() |
+| 3 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
+| 2 | h-tls| [TLS encryption](/t/14783) |
+| 3 | h-rotate-tls-ca-certificates   | [Rotate TLS/CA certificates](/t/15422) |
+| 1 | test | |
+|  | test2 | |
+[/details]"""
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(prog='discourse-offline-helper',
@@ -33,7 +49,7 @@ if __name__ == '__main__':
     config['docs_directory'] = args.docs_directory
 
     # Download and process a Discourse documentation set 
-    discourse_docs = DiscourseHandler(config)
+    discourse_docs = DiscourseHandler(config, test_navtable)
 
     discourse_docs.calculate_item_type() # determine if item is a folder, page, or both
     discourse_docs.calculate_filepaths() # calculate local file paths

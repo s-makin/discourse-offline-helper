@@ -123,22 +123,24 @@ class DiscourseHandler:
     :type home_topic_id: str
     """
 
-    def __init__(self, configuration: dict):
+    def __init__(self, configuration: dict, index_topic_raw: str = '') -> None:
         self.config = configuration
 
         self._items = []
-        self.__generate_items_list()
+        self.__generate_items_list(index_topic_raw)
 
-    def __generate_items_list(self) -> None:
+    def __generate_items_list(self, index_topic_raw: str = '') -> None:
         """
         Populates :param self._items: with :class:`DiscourseItem` objects generated from the navigation table.
         """
-        if not self.config['home_topic_id'].isdigit():
-            raise ValueError(f"Index topic ID '{self.config['home_topic_id']}' contains non-digit characters. Make sure to exclude '/t/'.")
-        self._index_topic_url = f"https://{self.config['instance']}/raw/{self.config['home_topic_id']}"
-        index_topic_raw = get_raw_markdown(self._index_topic_url)
+        if not index_topic_raw:
+            if not self.config['home_topic_id'].isdigit():
+                raise ValueError(f"Index topic ID '{self.config['home_topic_id']}' contains non-digit characters. Make sure to exclude '/t/'.")
+            self._index_topic_url = f"https://{self.config['instance']}/raw/{self.config['home_topic_id']}"
+            index_topic_raw = get_raw_markdown(self._index_topic_url)
 
-        logging.info(f"\nParsing navigation table in index topic {self._index_topic_url}...")
+            logging.info(f"\nParsing navigation table in index topic {self._index_topic_url}...")
+            
         navtable_raw = parse_discourse_navigation_table(index_topic_raw)
 
         logging.info(f"\nGenerating discourse navigation items...")

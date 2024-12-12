@@ -51,5 +51,48 @@ different_link_types_result = \
     {'Level': '2', 'Path': 'slug-f', 'Navlink': '[External link](https://somewhere-else.com)'}]
 
 ## test_generate_filepaths()
+navtable_diataxis_1_home_0 = \
+"""[details=Navigation]
 
-## test_generate_urls()
+| Level | Path | Navlink |
+|-------|------|---------|
+| 0 | Home | [Home](/t/9729)
+| 1 | tutorial | [Tutorial](/t/9722) |
+| 2 | t-set-up | [1. Set up the environment](/t/9724) |
+| 1 | how-to | [How To]() |
+| 2 | h-deploy | [Deploy]() |
+| 3 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
+| 2 | h-tls| [TLS encryption](/t/14783) |
+| 3 | h-rotate-tls-ca-certificates   | [Rotate TLS/CA certificates](/t/15422) |
+[/details]"""
+
+navtable_diataxis_0 = \
+"""[details=Navigation]
+
+| Level | Path | Navlink |
+|-------|------|---------|
+| 0 | tutorial | [Tutorial](/t/9722) |
+| 1 | t-set-up | [1. Set up the environment](/t/9724) |
+| 0 | how-to | [How To]() |
+| 1 | h-deploy | [Deploy]() |
+| 2 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
+| 1 | h-tls| [TLS encryption](/t/14783) |
+| 2 | h-rotate-tls-ca-certificates   | [Rotate TLS/CA certificates](/t/15422) |
+[/details]"""
+
+## test_generate_index_pages()
+navtable_mixed_landing_pages = \
+"""[details=Navigation]
+
+| Level | Path | Navlink |
+|-------|------|---------|
+| 1 | tutorial | [Tutorial](/t/9722) |
+| 2 | t-set-up | [1. Set up the environment](/t/9724) |
+| 1 | how-to | [How To]() |
+| 2 | h-deploy | [Deploy]() |
+| 3 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
+| 2 | h-tls| [TLS encryption](/t/14783) |
+| 3 | h-rotate-tls-ca-certificates   | [Rotate TLS/CA certificates](/t/15422) |
+| 1 | test | |
+|  | test2 | |
+[/details]"""
