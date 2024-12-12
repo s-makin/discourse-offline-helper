@@ -22,7 +22,7 @@ class DiscourseItem:
     navtable_navlink = ''
 
     isHomeTopic = False
-    isValid = True
+    isValid = True # determines whether the item will be downloaded or not
 
     title = ''
     topic_id = ''
@@ -38,25 +38,28 @@ class DiscourseItem:
 
         self.config = configuration
 
-        # Get values from Navigation table row
+        # Get 'Level' from navigation table
+        # For consistent filepath calculations across different Navtables, the default level of root items must be 1.
         if navtable_row['Level']:
             self.navtable_level = int(navtable_row['Level'])
         else:
             self.isValid = False # item is not valid if 'Level' column is empty
             return
         if self.navtable_level == 0:
-            self.navtable_level = 1  # level 0 is the same hierarchy as 1. makes filepath calculation easier.
+            self.navtable_level = 1  # level 0 items are treated as level 1 items
 
+        # Get 'Path' (i.e.the Discourse URL slug) from navigation table
         self.navtable_path = navtable_row['Path']
 
+        # Get 'Navlink' from navigation table
         self.navtable_navlink = navtable_row['Navlink']
         if not self.navtable_navlink:
             self.isValid = False # item is not valid if 'Navlink' column is empty
             return
 
-        # Get title, topic ID, and URL from the 'Navlink' column
+        # Parse title, topic ID, and URL from the 'Navlink' column
         self.__parse_navtable_navlink()
-
+        
         if self.topic_id == self.config['home_topic_id']:
             self.isHomeTopic = True
 
@@ -112,49 +115,50 @@ class DiscourseItem:
 
         # Extract topic ID number
         self.topic_id = link.split("/")[-1]
+        if not self.topic_id.isdigit():
+            logging.debug(
+                f"Topic ID is not valid for item {self.navtable_navlink}."
+                 "Make sure the format of the 'Navlink' is '[Title](/t/123)' or '[Title](/t/slug/123)'.")
+            return
         self.url = f"https://{self.config['instance']}/raw/{self.topic_id}"
         
 class DiscourseHandler:
     """
-    This is a client-facing handler class with methods to manage one set of Discourse documentation.
-    It contains methods to generate the directory structure of the documentation set and download.
+    This class contains methods to generate the directory structure of the documentation set and download.
 
     :param home_topic_id:Unique ID of the index/overview discourse topic containing the navtable without '/t/', e.g. '1234'.
     :type home_topic_id: str
     """
 
-    def __init__(self, configuration: dict):
+    def __init__(self, configuration: dict, raw_navtable: str = None):
         self.config = configuration
 
         self._items = []
-        self.__generate_items_list()
+        self.__generate_items_list(raw_navtable)
 
-    def __generate_items_list(self) -> None:
+    def __generate_items_list(self, raw_navtable: str = None):
         """
         Populates :param self._items: with :class:`DiscourseItem` objects generated from the navigation table.
         """
-        if not self.config['home_topic_id'].isdigit():
-            raise ValueError(f"Index topic ID '{self.config['home_topic_id']}' contains non-digit characters. Make sure to exclude '/t/'.")
-        self._index_topic_url = f"https://{self.config['instance']}/raw/{self.config['home_topic_id']}"
-        index_topic_raw = get_raw_markdown(self._index_topic_url)
-
-        logging.info(f"Parsing navigation table in index topic {self._index_topic_url}...")
-        navtable_raw = parse_discourse_navigation_table(index_topic_raw)
+        if not raw_navtable:
+            logging.info(f"Parsing navigation table in index topic {self._index_topic_url}...")
+            if not self.config['home_topic_id'].isdigit():
+                raise ValueError(f"Index topic ID '{self.config['home_topic_id']}' contains non-digit characters. Make sure to exclude '/t/'.")
+            
+            self._index_topic_url = f"https://{self.config['instance']}/raw/{self.config['home_topic_id']}"
+            index_topic_raw = get_raw_markdown(self._index_topic_url)
+            raw_navtable = parse_discourse_navigation_table(index_topic_raw)
 
         logging.info(f"Generating discourse navigation items...")
-        for row in navtable_raw:
+        for row in raw_navtable:
             logging.debug(f"  {row}")
             item = DiscourseItem(row, self.config)
-            if not item.isValid:
-                logging.debug(f"Item is not valid. Skipping.")
-                continue
             self._items.append(item)
 
         # If index/home page was not in the navtable, add to items manually
-        # TODO: expect Index as title or path
         index_topic = [x for x in self._items if x.topic_id == self.config['home_topic_id']]
         if not index_topic:
-            index_navlink = f"[Index](/t/{self.config['home_topic_id']})"
+            index_navlink = f"[Home](/t/{self.config['home_topic_id']})"
             index_row = {'Level': '1', 'Path': 'index', 'Navlink': index_navlink}
             self._items.append(DiscourseItem(index_row, self.config))
 
@@ -229,10 +233,7 @@ class DiscourseHandler:
         for item in self._items:
             if item.isTopic:
                 logging.debug(
-                    f"Downloading '{item.title}' to '{item.filepath}' from URL '{item.url}'...")
+                    f"Downloading '{item.title}' to '{item.filepath}' from URL '{item.url}'...")         
                 
-                item.filepath.parent.mkdir(parents=True, exist_ok=True) # make sure parent folders exist
-                if item.filepath.exists(): # if file already exists, remove
-                    os.remove(item.filepath)
-                
+                item.filepath.parent.mkdir(parents=True, exist_ok=True) # make sure parent folders exist                               
                 download_topic(path=item.filepath, url=item.url)

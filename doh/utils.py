@@ -19,7 +19,8 @@ def get_raw_markdown(url: str) -> str:
     """
 
     response = requests.get(url)
-    response.raise_for_status()
+    if not response.ok:
+        return 'Not found'
 
     return response.text
 

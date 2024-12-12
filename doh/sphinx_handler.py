@@ -28,13 +28,20 @@ class SphinxHandler:
                 # remove all lines after the delimiter in case there are comments
                 content_before_comments = []
                 comment_delimiter = '-------------------------\n'
+                if item.isHomeTopic:
+                    comment_delimiter = '## Navigation\n'
                 for line in lines:
                     if comment_delimiter in line:
                         break
                     content_before_comments.append(line)
 
+                if content_before_comments:
+                    lines = content_before_comments
+                else:
+                    logging.debug(f"Did not find comment delimiter in {item.filepath}")
+                
                 # remove first line containing `user | timestamp | #`
-                content_before_comments.pop(0)
+                lines.pop(0)
                 
                 with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
                         f.writelines(content_before_comments)
@@ -64,45 +71,15 @@ class SphinxHandler:
                 with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
                         f.writelines(updated_lines)
 
-    def __link_replacement(self, match):
-        text = match.group(1)
-        topic_id = match.group(2)
-        
-        new_value = ''
-        for item in self._discourse_docs._items:
-            if item.topic_id == topic_id:
-                new_value = item.filepath.relative_to(self.config['docs_directory'])
-        
-        return f"[{text}](/{new_value})"
-
-    def update_links(self):
-        """
-        Replaces local discourse links with local path to the equivalent file.
-        """
-        for item in self._discourse_docs._items:
-            if item.isTopic:
-                lines = []
-                with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
-                    lines = f.readlines()
-
-                updated_lines = []
-                pattern = r"\[([^\]]+)]\(/t/(\d+)\)"
-                for line in lines:
-                    new_line = re.sub(pattern, self.__link_replacement, line)
-                    updated_lines.append(new_line)
-
-                with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
-                        f.writelines(updated_lines)
-
     def update_index_pages(self):
         """
         Ensures there is an index page for each section.
 
-        Rename home page in DOCS_LOCAL_PATH to `index.md`. 
+        Rename home page in docs_local_path to `index.md`. 
         For each folder, if it has an identically named `.md` file, rename it to `index.md`. Otherwise, create it. 
         """       
         for item in self._discourse_docs._items:           
-            if item.isHomeTopic:
+            if item.isHomeTopic and item.filename != 'index':
                 # rename to 'index.md'
                 new_path = item.filepath.parent / 'index.md'
                 os.rename(item.filepath.with_suffix('.md'), new_path)
@@ -125,8 +102,9 @@ class SphinxHandler:
                                 f.write(f"\n")
                             else:
                                 f.write(f"# {item.filepath.name.title()}\n")
-
-                    new_item_row = {'Level': '1', 'Path': 'index', 'Navlink': '[Index]()'}
+                    
+                    title = item.filepath.name.title()
+                    new_item_row = {'Level': '1', 'Path': 'index', 'Navlink': f'[{title}]()'}
                     new_item = DiscourseItem(new_item_row, self.config)
                     new_item.update_filepath(index_file)
 
@@ -134,6 +112,36 @@ class SphinxHandler:
 
                     logging.info(f"Created {index_file}.")
 
+    def __link_replacement(self, match):
+        text = match.group(1)
+        topic_id = match.group(2)
+        
+        new_value = ''
+        for item in self._discourse_docs._items:
+            if item.topic_id == topic_id:
+                new_value = item.filepath.relative_to(self.config['docs_directory'])
+        
+        return f"[{text}](/{new_value})"
+
+    def update_links(self):
+        """
+        Replaces local discourse links with local path to the equivalent file.
+        """
+        for item in self._discourse_docs._items:
+            if item.isTopic:
+                lines = []
+                with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+
+                updated_lines = []
+                pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)\)" # Matches [<text>](/t/<id>)
+                for line in lines:
+                    new_line = re.sub(pattern, self.__link_replacement, line)
+                    updated_lines.append(new_line)
+
+                with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
+                        f.writelines(updated_lines)
+            
     def generate_h1_headings(self, replace_line = True):
         """
         Adds h1 heading to the first line.
@@ -173,23 +181,27 @@ class SphinxHandler:
         """
         Generate `toctree` for each index file
         """
+
         toctree_directives = f"\n```{{toctree}}\n:hidden:\n:titlesonly:\n:maxdepth: 2\n:glob:\n\n"
+        
         logging.info("\nGenerating toctrees for index files...")
         for item in self._discourse_docs._items:
-            if item.title == 'index' or item.isHomeTopic:
+            if item.title == 'index':
                 if item.isHomeTopic:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                         f.write(toctree_directives)
                         f.write("self\n")
-                        f.write("/tutorial/index\n")
-                        f.write("/how-to/index\n")
-                        f.write("/reference/index\n")
-                        f.write("/explanation/index\n")
+                        f.write("/tutorial*/index\n")
+                        f.write("/how*/index\n")
+                        f.write("/reference*/index\n")
+                        f.write("/explanation*/index\n")
+                        f.close()
                 else:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                         f.write(toctree_directives)
                         f.write("*\n")
                         f.write("*/index\n")
+                        f.close()
 
                 print(f"Created toctree for {item.filepath}")
 
