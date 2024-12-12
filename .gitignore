@@ -10,13 +10,8 @@
 docs/
 
 package*.json
-
 _build
-
 .DS_Store
-
 __pycache__
-
 .idea/
-
 .vscode/

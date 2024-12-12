@@ -5,16 +5,19 @@
 > 
 > If you are interested, please get in touch with Andreia Velasco! (@avgomes on Mattermost)
 
-The `doh` module:
-* Downloads discourse documentation locally into markdown files, conserving the navigation structure
-* Converts downloaded documentation into a Sphinx-compatible format. This includes:
+Features:
+* Download discourse documentation locally into markdown files, conserving the navigation structure
+* Convert downloaded files into a Sphinx-compatible format. This includes:
   * creating or renaming missing index files
   * replacing hyperlinks to internal discourse pages with the local filepath (e.g. `[Some guide](/t/123)` becomes `[Some guide](how-to/some-guide)`)
   * creating h1 headers if the Discourse pages don't already have them
   * appending a simple toctree to index pages (alphabetical order, `maxdepth 2`)
+  * replacing `[note]` admonitions with `{note}` and `[note=caution]` with `{caution}`
+* Build Sphinx docs with the built-in starter pack
 
-## demo
-The following instructions will show you how to set up your environment and run the script on a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)) into a local `'/docs'` folder:
+## demo/quickstart
+
+The following instructions will show you how to set up your environment, run the script on a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), and build it locally with the starter pack.
 
 Clone the repo and enter its root directory:
 ```
@@ -27,14 +30,24 @@ Start a virtual environment (called `demo` in the commands below):
 python3 -m venv demo
 source demo/bin/activate
 ```
+
 Install dependencies:
 ```
 python3 -m pip install -r requirements.txt
 ```
+
 Run `doh/main.py`
 ```
 python3 doh/main.py -docset opensearch
 ```
+
+When the script has finished running, `cd` into the `docs/` directory and build the starter pack:
+```
+cd docs/
+make run
+```
+>[!INFO]
+> See the [sphinx starter pack's README](https://github.com/canonical/sphinx-docs-starter-pack/blob/main/README.rst) for more information.
 
 ## try it on other doc sets
 
@@ -71,3 +84,6 @@ if False, the filename will be `slug-a.md`
 
 `generate_h1`: Whether or not to generate H1 headers automatically. 
 Only necessary if your pages don't have a h1 header already.
+
+### polish your new sphinx docs
+
