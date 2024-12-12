@@ -10,7 +10,7 @@ Generic Discourse utility functions
 
 def get_raw_markdown(url: str) -> str:
     """
-    Queries a URL and returns its raw markdown contents.
+    Queries a URL and returns its raw markdown contents. If the response fails, returns empty string.
 
     :param url: Full URL of the raw markdown content. e.g. 'https://discourse.charmhub.io/raw/9729'
     :type url: str
@@ -19,7 +19,9 @@ def get_raw_markdown(url: str) -> str:
     """
 
     response = requests.get(url)
-    response.raise_for_status()
+    if not response.ok:
+        logging.debug(f"{url} not found")
+        return ''
 
     return response.text
 
@@ -59,7 +61,7 @@ def parse_discourse_navigation_table(index_topic_markdown: str) -> list:
     
     return navigation_table
 
-def download_topic(path: str, url : str = None, raw_text : str = None) -> None:
+def download_topic(path: str, url : str = None) -> None:
     """
     Download a discourse topic to a markdown file. Must use either `url` or `raw_text`.
 
@@ -67,19 +69,10 @@ def download_topic(path: str, url : str = None, raw_text : str = None) -> None:
     :type path: str
     :param url: (Optional) URL of the raw discourse topic. E.g. 'https://discourse.charmhub.io/raw/9729'
     :type url: str, optional
-    :param raw_text: (Optional) Raw markdown content of a discourse topic.
-    :type raw_text: str, optional
     :rtype: None
     """
-    text = ''
-
-    if url and not raw_text:
-        text = get_raw_markdown(url)
-    elif raw_text and not url:
-        text = raw_text
-    else:
-        logging.error(f"Expected either a URL or raw text.")
-        return
+    
+    text = get_raw_markdown(url)
 
     output_path = pathlib.Path(path).with_suffix('.md')
     with open(output_path, 'w', encoding='utf-8') as f:

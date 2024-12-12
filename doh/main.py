@@ -12,7 +12,8 @@ test_navtable = \
 | Level | Path | Navlink |
 |-------|------|---------|
 | 1 | tutorial | [Tutorial](/t/9722) |
-| 2 | t-set-up | [1. Set up the environment](/t/9724) |
+| 2 | t-set-up | [1. Set up the environment](/t/9724/) |
+| 3 | test| [Test](/t/14783) |
 | 1 | how-to | [How To]() |
 | 2 | h-deploy | [Deploy]() |
 | 3 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     logging.basicConfig(
         stream=sys.stdout,
         format="%(message)s",
-        level=logging_level
+        level=logging_level     
     )
 
     # Load config.yaml and extract data

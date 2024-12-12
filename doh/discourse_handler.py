@@ -3,6 +3,7 @@ from slugify import slugify
 from pathlib import Path
 import logging
 import re
+import sys
 from utils import *
 
 class DiscourseItem:
@@ -38,23 +39,26 @@ class DiscourseItem:
 
         self.config = configuration
 
-        # Get values from Navigation table row
+        # Get 'Level' from navigation table
+        # For consistent filepath calculations across different Navtables, the default level of root items must be 1.
         if navtable_row['Level']:
             self.navtable_level = int(navtable_row['Level'])
         else:
             self.isValid = False # item is not valid if 'Level' column is empty
             return
         if self.navtable_level == 0:
-            self.navtable_level = 1  # level 0 is the same hierarchy as 1. makes filepath calculation easier.
+            self.navtable_level = 1  # level 0 items are treated as level 1 items
 
+        # Get 'Path' (i.e.the Discourse URL slug) from navigation table
         self.navtable_path = navtable_row['Path']
 
+        # Get 'Navlink' from navigation table
         self.navtable_navlink = navtable_row['Navlink']
         if not self.navtable_navlink:
             self.isValid = False # item is not valid if 'Navlink' column is empty
             return
 
-        # Get title, topic ID, and URL from the 'Navlink' column
+        # Parse title, topic ID, and URL from the 'Navlink' column
         self.__parse_navtable_navlink()
 
         if self.topic_id == self.config['home_topic_id']:
@@ -112,6 +116,11 @@ class DiscourseItem:
 
         # Extract topic ID number
         self.topic_id = link.split("/")[-1]
+        if not self.topic_id.isdigit():
+            logging.error(
+                f"Topic ID is not valid for item 'Level: {self.navtable_level}, Path: {self.navtable_path}, Navlink: {self.navtable_navlink}'."
+                 "\nMake sure the format of the 'Navlink' is '[Title](/t/123)', '[Title](/t/slug/123)', or empty")
+            sys.exit(1)
         self.url = f"https://{self.config['instance']}/raw/{self.topic_id}"
         
 class DiscourseHandler:
@@ -233,7 +242,4 @@ class DiscourseHandler:
                     f"\nDownloading '{item.title}' to '{item.filepath}' from URL '{item.url}'...")
                 
                 item.filepath.parent.mkdir(parents=True, exist_ok=True) # make sure parent folders exist
-                if item.filepath.exists(): # if file already exists, remove
-                    os.remove(item.filepath)
-                
                 download_topic(path=item.filepath, url=item.url)

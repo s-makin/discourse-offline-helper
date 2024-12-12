@@ -13,8 +13,6 @@ class SphinxHandler:
         
         The metadata on the first line is in the format `user | timestamp | #`.
         The comments are expected to be separated by a delimiter `-------------------------`.
-
-        :raises ValueError: If the file is empty.
         """
         logging.info("\nRemoving Discourse metadata...")
         for item in self._discourse_docs._items:
@@ -24,7 +22,8 @@ class SphinxHandler:
                     lines = f.readlines()
 
                 if len(lines) == 0:
-                    raise ValueError(f"File {item.filepath} is empty.")
+                    logging.error(f"File {item.filepath} is empty.")
+                    continue
                 
                 if comments:
                     # remove all lines after the `comment_delimiter`
