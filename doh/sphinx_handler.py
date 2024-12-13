@@ -10,10 +10,17 @@ class SphinxHandler:
     def replace_discourse_metadata(self, truncate_comments: bool = True, custom_delimiter: str = None):
         """
         Removes timestamp and (optionally) comments. Adds MyST heading target and a H1 heading.
-        
+
         The metadata on the first line is in the format `user | timestamp | #`.
         The comments are expected to be separated by a delimiter `-------------------------`.
         For the home page, the delimiter is `## Navigation`.
+
+        Parameters
+        ----------
+        truncate_comments : bool, optional
+            Whether to truncate comments, by default True.
+        custom_delimiter : str, optional
+            Custom delimiter to separate comments, by default None.
         """
         logging.info("\nRemoving Discourse metadata...")
         for item in self._discourse_docs._items:
@@ -68,11 +75,15 @@ class SphinxHandler:
 
     def replace_discourse_syntax(self):
         """
-        Replaces markdown elements with Discourse syntax (i.e. square brackets) and replaces them with Sphinx/RTD or regular markdown equivalents.
-        
+        Replaces markdown elements with Discourse syntax (i.e., square brackets) and replaces them with Sphinx/RTD 
+        or regular markdown equivalents.
+
+        Notes
+        -----
         The following replacements are made:
-        * [note] [/note] -> ```{note} for default, caution, information, and positive notes
-        * more replacements to be implemented
+        - `[note]` and `[/note]` -> ```{note}``` for default, caution, information, and positive notes.
+        - TODO: <href> anchors
+        - TODO: [tab][/tab] 
         """
         logging.info("\nReplacing discourse markdown syntax...")
         for item in self._discourse_docs._items:
@@ -97,10 +108,12 @@ class SphinxHandler:
 
     def update_index_pages(self):
         """
-        Ensures there is an index page for each section.
+        Ensures there is an index page for each parent folder.
 
-        Rename home page in docs_local_path to `index.md`. 
-        For each folder, if it has an identically named `.md` file, rename it to `index.md`. Otherwise, create it. 
+        - Renames the home page in `docs_local_path` to `index.md`.
+        - For each folder:
+            - If it has an identically named `.md` file, renames it to `index.md`.
+            - Otherwise, creates a new `index.md` file.
         """
         logging.info("\nUpdating index pages...")
 
@@ -173,7 +186,7 @@ class SphinxHandler:
 
     def generate_tocs(self):
         """
-        Generate `toctree` for each index file
+        Generates `toctree` for each index file
         """
         logging.info("\nGenerating toctrees for index files...")
 

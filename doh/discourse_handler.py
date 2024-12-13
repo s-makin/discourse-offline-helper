@@ -9,13 +9,37 @@ from utils import *
 class DiscourseItem:
     """
     A discourse navigation item represented by one row of the navtable.
-    This class is meant to be managed exclusively by the :class:`DiscourseHandler`.
+    This class is meant to be managed exclusively by the DiscourseHandler.
 
-    :param navtable_row: e.g. {'Level': 1, 'Path': tutorial, 'Navlink': '[Tutorial](/t/123)}
-    :type navtable_row: dict
+    Parameters
+    ----------
+    navtable_row : dict
+        A dictionary representing a row of the navtable, e.g. {'Level': 1, 'Path': 'tutorial', 'Navlink': '[Tutorial](/t/123)'}
+    configuration : dict
+        A dictionary containing settings from `config.yaml`.
 
-    A DiscourseItem object contains properties that are calculated by this class automatically
-    and properties that must be filled in externally.
+    Attributes
+    ----------
+    navtable_level : int
+        The level of the item in the navigation table.
+    navtable_path : str
+        The path (i.e., the Discourse URL slug) from the navigation table.
+    navtable_navlink : str
+        The navlink from the navigation table.
+    isHomeTopic : bool
+        Whether the item is the home topic.
+    isValid : bool
+        If False, the item will be ignored.
+    title : str
+    topic_id : str
+    url : str
+    filename : str
+
+    Attributes set by DiscourseHandler
+    ----------
+    filepath : Path
+    isFolder : bool
+    isTopic : bool
     """
 
     navtable_level = 0
@@ -23,14 +47,13 @@ class DiscourseItem:
     navtable_navlink = ''
 
     isHomeTopic = False
-    isValid = True # if False, will not be downloaded
+    isValid = True
 
     title = ''
     topic_id = ''
     url = ''
     filename = ''
     
-    # Properties set by DiscourseHandler
     filepath = Path()
     isFolder = False
     isTopic = True
@@ -71,8 +94,10 @@ class DiscourseItem:
         """
         Updates the file path of the item.
 
-        :param path: New file path
-        :type path: Path
+        Parameters
+        ----------
+        path : Path
+            New file path
         """
         self.filepath = path
         self.filename = path.stem
@@ -115,11 +140,22 @@ class DiscourseItem:
         
 class DiscourseHandler:
     """
-    This is a client-facing handler class with methods to manage one set of Discourse documentation.
+    Manages one set of Discourse documentation.
     It contains methods to generate the directory structure of the documentation set and download.
 
-    :param home_topic_id:Unique ID of the index/overview discourse topic containing the navtable without '/t/', e.g. '1234'.
-    :type home_topic_id: str
+    Parameters
+    ----------
+    configuration : dict
+        A dictionary containing settings from `config.yaml`.
+    index_topic_raw : str, optional
+        Raw content of the index topic, by default ''.
+
+    Attributes
+    ----------
+    config : dict
+        A dictionary containing settings from `config.yaml`.
+    _items : list
+        List of DiscourseItem objects.
     """
 
     def __init__(self, configuration: dict, index_topic_raw: str = '') -> None:
@@ -161,10 +197,16 @@ class DiscourseHandler:
 
     def calculate_item_type(self) -> None:
         """
-        Calculates whether each item is a folder, topic, or both (i.e. a header with a landing page).
-        Default values are: isFolder = False, isTopic = True
+        Calculates whether each item is a folder, topic, or both (i.e., a header with a landing page).
+        
+        Each item in the navigation table is evaluated based on its properties. Default values are:
+        - `isFolder = False`
+        - `isTopic = True`
+        
+        Examples
+        --------
+        The navigation items below are evaluated as follows:
 
-        For example, the navigation items below would be evaluated as follows:
         | Level   | Path | Navlink |
         |---------|------|---------|
         | 1 | slug-a  | [Category A](/t/123)    --> isFolder = true, isTopic = true
@@ -177,8 +219,7 @@ class DiscourseHandler:
             if not self._items[i].isHomeTopic and (i < len(self._items) - 1):
                 current_item_level = int(self._items[i].navtable_level)
                 next_item_level = int(self._items[i+1].navtable_level)
-
-                # Case 1: Current item is a folder if the next item is one level deeper (TODO unless it's level 0?  test removing Case 2 and allowing Level 0)
+                # Current item is a folder if the next item is one level deeper
                 if next_item_level == (current_item_level + 1):
                     self._items[i].isFolder = True
             # Current item is a folder and NOT a topic if the URL is empty
@@ -190,7 +231,10 @@ class DiscourseHandler:
             """
             Calculates the relative path of each item based on their level.
 
-            For example, the navigation items below:
+            Examples
+            --------
+            The navigation items below:
+
             | Level   | Path | Navlink |
             |---------|------|---------|
             | 1 | tutorial   | [Tutorial](/t/123) |
@@ -198,9 +242,9 @@ class DiscourseHandler:
             | 3 | set-up | [Set up your environment](/t/124) |
 
             are assigned the paths:
-            /tutorial
-            /tutorial/deploy-for-the-first-time
-            /tutorial/deploy-for-the-first-time/set-up-your-environment
+            - /tutorial
+            - /tutorial/deploy-for-the-first-time
+            - /tutorial/deploy-for-the-first-time/set-up-your-environment
             """
             stack = []
             for i in range(len(self._items)):
@@ -219,15 +263,9 @@ class DiscourseHandler:
                 elif self._items[i].isFolder:
                     self._items[i].filepath = self.config['docs_directory'] / path
 
-                # # If a topic is also a folder, append filename such that topic.md gets downloaded into /topic/topic.md
-                # if self._items[i].isTopic and self._items[i].isFolder:
-                #     self._items[i].filepath = self.config['docs_directory'] / path / path.name.with_suffix('.md')
-                # else:
-                #     self._items[i].filepath = self.config['docs_directory'] / path
-
     def download(self) -> None:
         """
-        Downloads all topics from their URLs into the paths calculated by :meth:`calculate_filepaths`.
+        Downloads all topics from their URLs into the paths returned by calculate_filepaths()
         """
         logging.debug("")
         for item in self._items:
