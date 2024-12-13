@@ -3,14 +3,13 @@
 Downloads a Discourse documentation set and prepares it for building with the Canonical Sphinx starter pack.
 
 > [!WARNING]
-> This tool is under active development and may not produce the expected result on all documentation sets.
-> If you'd like get it working for a particular doc set, don't hesitate to contact `@avgomes` on Mattermost.
+> This tool is under active development and may not work correctly on all documentation sets.
+> If you'd like to troubleshoot or customize this tool for a particular doc set, don't hesitate to contact `@avgomes` on Mattermost.
 
 ## Features
 * Downloads raw markdown files locally
 * Creates or renames missing index files
 * Replaces hyperlinks to internal discourse pages with the local filepath (e.g. `[Some guide](/t/123)` becomes `[Some guide](how-to/some-guide)`)
-  * :exclamation: Links to a particular heading on another page, i.e. `(/t/123#some-anchor)` does not work yet. The entire linking/cross-referencing logic will be reworked and improved with MyST anchors.
 * Creates h1 headers if the Discourse pages don't already have them
 * Appends a simple toctree to index pages (alphabetical order, `maxdepth 2`)
 * Replaces `[note]` discourse syntax

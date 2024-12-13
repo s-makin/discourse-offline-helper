@@ -39,9 +39,9 @@ if __name__ == '__main__':
     config = config[args.docset]
     config['docs_directory'] = args.docs_directory
 
-    # TEMPORARY: Delete existing src/ directory
-    if args.docs_directory == 'docs/src/' and os.path.exists('docs/src/'):
-        shutil.rmtree('docs/src/')
+    # Uncomment to delete the existing docs directory each time the script is run
+    # if os.path.exists(args.docs_directory):
+    #     shutil.rmtree(args.docs_directory)
         
     # Download and process a Discourse documentation set 
     discourse_docs = DiscourseHandler(config)
