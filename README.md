@@ -19,11 +19,16 @@ Downloads a Discourse documentation set and prepares it for building with the Ca
 
 <summary>Planned</summary>
 
-* Will autogenerate MyST heading targets and fix cross-references
-* Will replace `[tab]` discourse syntax
-* Will replace `<href>` anchors with regular markdown headings
+* Fix issue with cross-referencing other headings
+* Use MyST heading targets for cross-references
+* Improve the UI
+    * add option to use text file with navtable as the input
+    * make function sequences and dependencies more transparent
+    * snap the `doh` module to remove python requirement (`sudo snap install doh & doh -docset <product>`)
+* Automatically replace `[tab]` discourse syntax
+* Automatically replace `<href>` anchors with regular markdown headings
 * PDF features
-* Snap the `doh` module to remove python requirement: `sudo snap install doh & doh -docset <product>`
+* ...
 
 </details>
 
@@ -85,31 +90,41 @@ Requirement: (mandatory) The navigation table is wrapped in `[details=Navigation
 
 [details=Navigation]
 ```
-
-Requirement: (recommended) Level 0 items must be standalone pages, like the Home page. They must not be parent folders.
+##### Levels and nesting
+Requirement: (recommended) If you have Level 0 items, they must be standalone pages, like the Home page. They must not be parent folders.
 Requirement: (mandatory) Diataxis categories must be at Level 1.
-```
-| Level   | Path | Navlink |
-|---------|------|---------|
-| 0 | home | [Home](/t/123) |
-| 1 | tutorial | [Tutorial](/t/123) |
-| 
-```
 
+    Example of a valid navigation table structure:
+    ```
+    | Level   | Path | Navlink |
+    |---------|------|---------|
+    | 0 | home | [Home](/t/123) |               --> OK: standalone page at Level 0    
+    | 1 | tutorial | [Tutorial](/t/124) |       --> OK: top-level parent folder at Level 1   
+    | 2 | get-started | [Get started](/t/125) | --> OK: nested under a Level 1 parent   
+    | 1 | some-other-page | [Some other page](/t/129) | --> OK: standalone page at Level 1
+
+    ```
+    Example of a non-valid navigation structure:
+    ```
+    | 0 | tutorial | [Tutorial](/t/124) |       --> NOT OK: top-level parent folder at Level 0  
+    | 1 | get-started | [Get started](/t/125) | --> NOT OK: nested under a Level 0 parent   
+    ```
 
 Requirement: (mandatory) Pages should not be nested more than one level below the previous.
-    OK:
+    Example of a correct Level sequence:
     ```
     | 1 | <path> | [<title>](/t/<id>) |
     | 2 | <path> | [<title>](/t/<id>) |
     | 3 | <path> | [<title>](/t/<id>) |
     | 1 | <path> | [<title>](/t/<id>) | # skipping levels upwards is ok
     ```
-    NOT OK:
+    Example of an incorrect Level sequence:
     ```
     | 1 | <path> | [<title>](/t/<id>) |
     | 3 | <path> | [<title>](/t/<id>) | # cannot skip levels downwards
     ```
+
+##### Navlink
 
 Topics with a Navlink that is empty or points to an external link will simply be ignored. The following example Navlinks will be correctly processed:
 * `[Title](/t/123)` 

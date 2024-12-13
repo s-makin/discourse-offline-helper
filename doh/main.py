@@ -9,22 +9,6 @@ from correct_navtables import *
 
 CONFIG_FILE = 'doh/config.yaml'
 
-test_navtable = \
-"""[details=Navigation]
-
-| Level | Path | Navlink |
-|-------|------|---------|
-| 0 | home | [Home](/t/9729) |
-| 1 | tutorial | [Tutorial](/t/9722) |
-| 2 | t-set-up | [1. Set up the environment](/t/9724) |
-| 2 | t-deploy-opensearch | [2. Deploy OpenSearch](/t/9716) |
-| 1 | how-to | [How To]() |
-| 2 | h-deploy | Deploy |
-| 3 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
-| 2 | | TLS encryption |
-| 3 | h-enable-tls | [Enable TLS encryption](/t/14783) |
-[/details]"""
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(prog='discourse-offline-helper',
@@ -60,7 +44,7 @@ if __name__ == '__main__':
         shutil.rmtree('docs/src/')
         
     # Download and process a Discourse documentation set 
-    discourse_docs = DiscourseHandler(config, multipass_navtable)
+    discourse_docs = DiscourseHandler(config)
 
     discourse_docs.calculate_item_type() # determine if item is a folder, page, or both
     discourse_docs.calculate_filepaths() # calculate local file paths
@@ -70,11 +54,7 @@ if __name__ == '__main__':
     sphinx_docs = SphinxHandler(discourse_docs, config)
 
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
-
     sphinx_docs.update_links() # replace discourse links with local file paths
-
     sphinx_docs.replace_discourse_metadata(truncate_comments=True) # remove timestamp and comments, adds h1 headings.
-
     sphinx_docs.replace_discourse_syntax() # replace [note] admonitions
-
     sphinx_docs.generate_tocs() # generate toctree for each index file
