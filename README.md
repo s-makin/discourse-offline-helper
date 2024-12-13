@@ -1,8 +1,9 @@
 # discourse-offline-helper (doh)
 
-Downloads a discourse documentation set and transforms into a Canonical Sphinx starter pack-compatible format, ready to build.
+Downloads a Discourse documentation set and prepares it for building with the Canonical Sphinx starter pack.
 
 ## Features
+* Downloads raw markdown files locally
 * Creates or renames missing index files
 * Replaces hyperlinks to internal discourse pages with the local filepath (e.g. `[Some guide](/t/123)` becomes `[Some guide](how-to/some-guide)`)
 * Creates h1 headers if the Discourse pages don't already have them
@@ -21,28 +22,9 @@ Downloads a discourse documentation set and transforms into a Canonical Sphinx s
 
 </details>
 
-## Demo
+## Quickstart
 
-Set up your Python environment, run the script on a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), and build it locally with the starter pack. 
-
-Clone the repo and enter its root directory:
-```
-git clone git@github.com:s-makin/discourse-offline-helper.git
-cd discourse-offline-helper
-```
-
-Start a virtual Python environment (called `demo` in the commands below):
-```
-python3 -m venv demo
-source demo/bin/activate
-```
-
-Install dependencies:
-```
-python3 -m pip install -r requirements.txt
-```
-
-Run `doh/main.py`
+To run the script on a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), run `doh/main.py`
 ```
 python3 doh/main.py -docset opensearch
 ```
@@ -55,15 +37,12 @@ make run
 >![INFO]
 > See the [sphinx starter pack's README](https://github.com/canonical/sphinx-docs-starter-pack/blob/main/README.rst) for more information.
 
-## Try it on other doc sets
+### Try it on other doc sets
 
 There are currently several pre-configured Discourse documentation sets that can be passed in as `-docset` arguments:
 * `multipass`
 * `landscape`
-* `mir`
-* `ubuntu_core`
 * `snap`
-* `kafka`
 * `mongodb`
 * `opensearch`
 * `postgresql`
@@ -76,8 +55,7 @@ To edit an existing doc set or create a new one, edit the [`config.yaml`](doh/co
 
 `discourse_instance`: Discourse instance without 'http://'
 
-`home_topic_id`: Index/overview/home topic ID without '/t/'
-This would be the discourse topic that contains the Navigation table.
+`home_topic_id`: Index/overview/home topic ID without '/t/'. This would be the discourse topic that contains the Navigation table.
 
 `generate_h1`: Whether or not to generate H1 headers automatically. This is necessary if the discourse topics don't already have one.
 

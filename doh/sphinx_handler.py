@@ -71,7 +71,7 @@ class SphinxHandler:
         Replaces markdown elements with Discourse syntax (i.e. square brackets) and replaces them with Sphinx/RTD or regular markdown equivalents.
         
         The following replacements are made:
-        * [note] [/note] -> ```{note}
+        * [note] [/note] -> ```{note} for default, caution, information, and positive notes
         * more replacements to be implemented
         """
         logging.info("\nReplacing discourse markdown syntax...")
@@ -83,9 +83,12 @@ class SphinxHandler:
 
                 updated_lines = []
                 for line in lines:
-                    line = re.sub(r'\[note.*?caution.*?\]', r'```{caution}', line)  # Matches [note="caution"] and replaces with ```{caution}
-                    line = re.sub(r'\[note\]', r'```{note}', line)  # Matches [note] and replaces with ```{note}
-                    line = re.sub(r'\[/note\]', r'```', line)  # Matches [/note] and replaces with ```
+                    line = re.sub(r'\[note\]', r'```{note}', line)  # Replaces [note] with ```{note}
+                    line = re.sub(r'\[note.*?caution.*?\]', r'```{caution}', line)  # Replaces [note="caution"] with ```{caution}
+                    line = re.sub(r'\[note.*?information.*?\]', r'```{note}', line)  # Replaces [note="information"] with ```{note}
+                    line = re.sub(r'\[note.*?negative.*?\]', r'```{warning}', line)  # Replaces [note="negative"] with ```{note}
+                    line = re.sub(r'\[note.*?positive.*?\]', r'```{tip}', line)  # Replaces [note="information"] with ```{note}
+                    line = re.sub(r'\[/note\]', r'```', line)  # Replaces [/note] with ```
 
                     updated_lines.append(line)
 
