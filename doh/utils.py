@@ -86,7 +86,6 @@ def download_topic(path: str, url : str = None) -> None:
         URL of the raw Discourse topic, e.g. 'https://discourse.charmhub.io/raw/9729'. 
         Default is None.
     """
-    
     text = get_raw_markdown(url)
 
     output_path = pathlib.Path(path).with_suffix('.md')

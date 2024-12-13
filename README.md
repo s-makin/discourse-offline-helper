@@ -33,26 +33,25 @@ Downloads a Discourse documentation set and prepares it for building with the Ca
 
 ## Quickstart
 
-To convert a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)):
+To convert a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), run
 ```
 python3 doh/main.py --docset opensearch
 ```
-> optionally use the `--debug` flag for more detailed logs
+> use the `--debug` flag for more detailed logs
 
-When the script has finished running, `cd` into the `docs/` directory and build the starter pack:
+`cd` into the `docs/` directory and build the starter pack:
 ```
 cd docs/
 make run
 ```
-> [!NOTE]
+> [!TIP]
 > See the [sphinx starter pack's README](https://github.com/canonical/sphinx-docs-starter-pack/blob/main/README.rst) for more information.
 
 ### Try it on other doc sets
 
-There are currently several pre-configured Discourse documentation sets that can be passed in as `-docset` arguments:
+There are currently several pre-configured Discourse documentation sets that can be passed in as `--docset` arguments:
 * `multipass`
 * `landscape`
-* `snap`
 * `mongodb`
 * `opensearch`
 * `postgresql`
