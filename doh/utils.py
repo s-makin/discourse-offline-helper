@@ -3,6 +3,7 @@ import logging
 import pathlib
 import re
 import csv
+import sys
 
 """
 Generic Discourse utility functions
@@ -42,7 +43,8 @@ def parse_discourse_navigation_table(index_topic_markdown: str) -> list:
         flags=re.DOTALL,
     )
     if not match:
-        raise ValueError("Unable to find navigation table.")
+        logging.error("ERROR: No navigation table found in index topic. Exiting program.")
+        sys.exit(1)
     
     # Extract content inside `[details]` markers (i.e. the navtable)
     table = match.group(1).strip()

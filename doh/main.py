@@ -12,10 +12,15 @@ test_navtable = \
 
 | Level | Path | Navlink |
 |-------|------|---------|
-| 1 | tutorial | [Tutorial](/t/9722) |
+| 0 | home | [Home](/t/9729) |
 | 1 | tutorial | [Tutorial](/t/9722) |
 | 2 | t-set-up | [1. Set up the environment](/t/9724) |
-\
+| 2 | t-deploy-opensearch | [2. Deploy OpenSearch](/t/9716) |
+| 1 | how-to | [How To]() |
+| 2 | h-deploy | Deploy |
+| 3 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
+| 2 | | TLS encryption |
+| 3 | h-enable-tls | [Enable TLS encryption](/t/14783) |
 [/details]"""
 
 if __name__ == '__main__':
@@ -29,7 +34,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     logging_level = logging.INFO
-    if args.debug:
+    if args.debug: 
         logging_level = logging.DEBUG
     logging.basicConfig(
         stream=sys.stdout,
@@ -41,15 +46,19 @@ if __name__ == '__main__':
     with open(CONFIG_FILE) as config_file:
         config = yaml.safe_load(config_file)
 
+    if args.docset not in config:
+        logging.error(f"ERROR: Documentation set '{args.docset}' not found in config.yaml. Exiting program.")
+        sys.exit(1)
+
     config = config[args.docset]
     config['docs_directory'] = args.docs_directory
 
     # TEMPORARY: Delete existing src/ directory
-    if args.docs_directory == 'docs/src/':
+    if args.docs_directory == 'docs/src/' and os.path.exists('docs/src/'):
         shutil.rmtree('docs/src/')
         
     # Download and process a Discourse documentation set 
-    discourse_docs = DiscourseHandler(config) #, test_navtable)
+    discourse_docs = DiscourseHandler(config, test_navtable)
 
     discourse_docs.calculate_item_type() # determine if item is a folder, page, or both
     discourse_docs.calculate_filepaths() # calculate local file paths
@@ -68,6 +77,5 @@ if __name__ == '__main__':
 
     if config['generate_h1']:
         sphinx_docs.generate_h1_headings() # add h1 heading based on 'Navlink' text
-
 
     sphinx_docs.generate_tocs() # generate toctree for each index file

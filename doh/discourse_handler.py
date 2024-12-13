@@ -108,8 +108,8 @@ class DiscourseItem:
         self.topic_id = link.split("/")[-1]
         if not self.topic_id.isdigit():
             logging.error(
-                f"Topic ID is not valid for item 'Level: {self.navtable_level}, Path: {self.navtable_path}, Navlink: {self.navtable_navlink}'."
-                 "\nMake sure the format of the 'Navlink' is '[Title](/t/123)', '[Title](/t/slug/123)', or empty")
+                f"ERROR: Topic ID is not valid for item 'Level: {self.navtable_level}, Path: {self.navtable_path}, Navlink: {self.navtable_navlink}'."
+                 "\nMake sure the format of the 'Navlink' is '[Title](/t/123)', '[Title](/t/slug/123)', or empty. Exiting program.")
             sys.exit(1)
         self.url = f"https://{self.config['instance']}/raw/{self.topic_id}"
         
@@ -178,11 +178,8 @@ class DiscourseHandler:
                 current_item_level = int(self._items[i].navtable_level)
                 next_item_level = int(self._items[i+1].navtable_level)
 
-                # Case 1: Current item is a folder if the next item is one level deeper
+                # Case 1: Current item is a folder if the next item is one level deeper (TODO unless it's level 0?  test removing Case 2 and allowing Level 0)
                 if next_item_level == (current_item_level + 1):
-                    self._items[i].isFolder = True
-                # Case 2: Current item is a top-level folder with a landing page and no children
-                elif current_item_level == 1 and next_item_level == 1 and self._items[i].url:
                     self._items[i].isFolder = True
             # Current item is a folder and NOT a topic if the URL is empty
             if not self._items[i].url:
@@ -215,11 +212,18 @@ class DiscourseHandler:
 
                 path = Path(filepath_string)
 
-                # If a topic is also a folder, append filename such that topic.md gets downloaded into /topic/topic.md
-                if self._items[i].isTopic and self._items[i].isFolder:
-                    self._items[i].filepath = self.config['docs_directory'] / path / path.name
-                else:
+                if self._items[i].isTopic:
+                    self._items[i].filepath = self.config['docs_directory'] / path.with_suffix('.md')
+                    if self._items[i].isFolder:
+                        self._items[i].filepath = (self.config['docs_directory'] / path / path.name).with_suffix('.md')
+                elif self._items[i].isFolder:
                     self._items[i].filepath = self.config['docs_directory'] / path
+
+                # # If a topic is also a folder, append filename such that topic.md gets downloaded into /topic/topic.md
+                # if self._items[i].isTopic and self._items[i].isFolder:
+                #     self._items[i].filepath = self.config['docs_directory'] / path / path.name.with_suffix('.md')
+                # else:
+                #     self._items[i].filepath = self.config['docs_directory'] / path
 
     def download(self) -> None:
         """
@@ -227,9 +231,6 @@ class DiscourseHandler:
         """
         logging.debug("")
         for item in self._items:
-            if item.isFolder: # create folders explicitly in case of an empty parent folder with no landing page
-                logging.debug(f"\nCreating folder '{item.filepath}'...")
-                item.filepath.mkdir(parents=True, exist_ok=True)
             if item.isTopic:
                 logging.debug(
                     f"\nDownloading '{item.title}' to '{item.filepath}' from URL '{item.url}'...")

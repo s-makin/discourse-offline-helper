@@ -8,11 +8,18 @@ Downloads a discourse documentation set and transforms into a Canonical Sphinx s
 * Creates h1 headers if the Discourse pages don't already have them
 * Appends a simple toctree to index pages (alphabetical order, `maxdepth 2`)
 * Replaces `[note]` discourse syntax
-* (Planned) Will replace `[tab]` discourse syntax
-* (Planned) Will replace `<href>` anchors with regular markdown headings
-* (Planned) Will autogenerate MyST heading targets
-* (Planned) PDF features
-* (Planned) Package doh module for easier UI
+
+<details>
+
+<summary>Planned</summary>
+
+* Will replace `[tab]` discourse syntax
+* Will replace `<href>` anchors with regular markdown headings
+* Will autogenerate MyST heading targets
+* PDF features
+* Snap the `doh` module to remove python requirement: `sudo snap install doh & doh -docset <product>`
+
+</details>
 
 ## Demo
 
@@ -92,21 +99,29 @@ E.g.
 [details=Navigation]
 ```
 
-**Level**: (WIP - expected level structure)
+**Level**:
+* Level 0 items must be standalone pages, like the Home page. They cannot be parents, like Diataxis sections.
+* Diataxis categories must be at Level 1
+* All levels should be +/- 1 level from each other. E.g. a Level 2 row cannot be followed by a Level 4 row. It must be followed either by Level 3 (one below) or Level 1 (one above). 
 
-**Path**: (WIP - can be empty)
+**Path**: This is not used, so there are no explicit requirements.
 
-**Navlink**: (WIP)
+**Navlink**:
+* Accepted: `[Title](/t/123)`
+* Accepted: `[Title](/t/some-slug/123)`
+* Accepted: `Title`
+* Accepted: `[Title](/t/123)`
+* Not accepted: (empty) - this row will be ignored
 
 ### Polish or troubleshoot your new Sphinx docs
 
 Once you've run the script and built the HTML docs, you'll probably notice a few things that still need some polishing - maybe some formatting is off or the navigation doesn't show up as expected.
 
 Here's a rough checklist of things to look out for
-* `conf.py`: Edit the product title, links, and any other relevant settings
+* `conf.py`: Edit the product title, links, and any other relevant settings.
 * `index.md` pages: You may want to edit the `toctree`s to reflect a different order or display other titles.
-* All markdown pages: Check the formatting.  so it will likely not convert all of the formatting. Certain admonitions and other discourse-flavored markdown elements (i.e. those in `[square brackets][/square brackets]`) might need to be edited manually. Or, you could add more formatting checks to the [`replace_discourse_syntax()`](https://github.com/s-makin/discourse-offline-helper/blob/2d9b233fac16bf1045d07ea008cfe3e8e4b65c5d/doh/sphinx_handler.py#L42) function!
-* Links: Check the warnings in the output of the `make run` for a list of links and cross-references that did not process correctly.
+* All markdown pages: Check the formatting, since there might be some discourse-flavored markdown (e.g. stuff in `[square brackets][/square brackets]`) left over. Edit them manually, or add more formatting checks to the [`replace_discourse_syntax()`](https://github.com/s-makin/discourse-offline-helper/blob/2d9b233fac16bf1045d07ea008cfe3e8e4b65c5d/doh/sphinx_handler.py#L42) function!
+* Check the warnings in the output of the `make run` for common issues like links and cross-references that did not process correctly and files that were not found by the auto-generated `toctree`.
 
 ## Contribute
 

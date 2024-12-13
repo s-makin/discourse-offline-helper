@@ -22,13 +22,15 @@ class SphinxHandler:
                     lines = f.readlines()
 
                 if len(lines) == 0:
-                    logging.error(f"File {item.filepath} is empty.")
+                    logging.error(f"ERROR: File {item.filepath} is empty. Exiting program.")
                     continue
                 
                 if comments:
                     # remove all lines after the `comment_delimiter`
                     content_before_comments = []
                     comment_delimiter = '-------------------------\n'
+                    if item.isHomeTopic:
+                        comment_delimiter = '# Navigation'
                     for line in lines:
                         if comment_delimiter in line:
                             break
@@ -89,14 +91,14 @@ class SphinxHandler:
             if item.isFolder:
                 if item.isTopic: 
                     # already has index topic; just need to rename
-                    new_path = item.filepath.parent / 'index'
+                    new_path = item.filepath.parent / 'index.md'
                     os.rename(item.filepath.with_suffix('.md'), new_path.with_suffix('.md'))
                     item.update_filepath(new_path)
 
                     logging.debug(f"Renamed {item.filepath} to {new_path}")
                 else: 
                     # does not have an index topic, need to create
-                    index_file = item.filepath / 'index'
+                    index_file = item.filepath / 'index.md'
                     with open(index_file.with_suffix('.md'), 'w', encoding='utf-8') as f:
                             if self.config['generate_h1']:
                                 f.write(f"\n")
@@ -166,6 +168,9 @@ class SphinxHandler:
         for item in self._discourse_docs._items:
             if item.isTopic:
                 lines = []
+                if not item.filepath.with_suffix('.md').exists():
+                    logging.error(f"ERROR: File {item.filepath} not found. Exiting program")
+                    sys.exit(1)
                 with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
                     lines = f.readlines()
 
@@ -190,11 +195,12 @@ class SphinxHandler:
                 if item.isHomeTopic:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                         f.write(toctree_directives)
-                        f.write("self\n")
+                        f.write("Home <self>\n")
                         f.write("/tutorial*/index\n")
                         f.write("/how*/index\n")
                         f.write("/reference*/index\n")
                         f.write("/explanation*/index\n")
+                        f.write("*\n")
                 else:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                         f.write(toctree_directives)
