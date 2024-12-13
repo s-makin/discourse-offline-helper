@@ -2,10 +2,15 @@
 
 Downloads a Discourse documentation set and prepares it for building with the Canonical Sphinx starter pack.
 
+> [!WARNING]
+> This tool is under active development and may not produce the expected result on all documentation sets.
+> If you'd like get it working for a particular doc set, don't hesitate to contact `@avgomes` on Mattermost.
+
 ## Features
 * Downloads raw markdown files locally
 * Creates or renames missing index files
 * Replaces hyperlinks to internal discourse pages with the local filepath (e.g. `[Some guide](/t/123)` becomes `[Some guide](how-to/some-guide)`)
+  * :exclamation: Links to a particular heading on another page, i.e. `(/t/123#some-anchor)` does not work yet. The entire linking/cross-referencing logic will be reworked and improved with MyST anchors.
 * Creates h1 headers if the Discourse pages don't already have them
 * Appends a simple toctree to index pages (alphabetical order, `maxdepth 2`)
 * Replaces `[note]` discourse syntax
@@ -14,9 +19,9 @@ Downloads a Discourse documentation set and prepares it for building with the Ca
 
 <summary>Planned</summary>
 
+* Will autogenerate MyST heading targets and fix cross-references
 * Will replace `[tab]` discourse syntax
 * Will replace `<href>` anchors with regular markdown headings
-* Will autogenerate MyST heading targets
 * PDF features
 * Snap the `doh` module to remove python requirement: `sudo snap install doh & doh -docset <product>`
 
@@ -24,7 +29,7 @@ Downloads a Discourse documentation set and prepares it for building with the Ca
 
 ## Quickstart
 
-To run the script on a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), run `doh/main.py`
+To run convert a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), run `doh/main.py`
 ```
 python3 doh/main.py -docset opensearch
 ```
@@ -34,7 +39,7 @@ When the script has finished running, `cd` into the `docs/` directory and build 
 cd docs/
 make run
 ```
->![INFO]
+> [!NOTE]
 > See the [sphinx starter pack's README](https://github.com/canonical/sphinx-docs-starter-pack/blob/main/README.rst) for more information.
 
 ### Try it on other doc sets
@@ -51,23 +56,26 @@ There are currently several pre-configured Discourse documentation sets that can
 
 To edit an existing doc set or create a new one, edit the [`config.yaml`](doh/config.yaml) file.
 
-### `config.yaml` parameters
-
-`discourse_instance`: Discourse instance without 'http://'
-
-`home_topic_id`: Index/overview/home topic ID without '/t/'. This would be the discourse topic that contains the Navigation table.
-
-`generate_h1`: Whether or not to generate H1 headers automatically. This is necessary if the discourse topics don't already have one.
+Create a new entry with the name of the docset and insert values for:
+* `discourse_instance`: Discourse instance without 'http://'
+* `home_topic_id`: Index/overview/home topic ID without '/t/'. This would be the discourse topic that contains the Navigation table.
+* `generate_h1`: Whether or not to generate H1 headers automatically. This is necessary if the discourse topics don't already have one.
 
 ### Documentation requirements
 
-#### Home page (index topic)
-**Navigation table** is wrapped in `[details=Navigation]` and preceded by `# Navigation` h1 heading. 
+This tool takes into account several common variations between different Discourse sets, but not all. In order for it to work as smoothly as possible, there are a few simple requirements that the documentation set must fulfill.
 
-E.g.
+Conditions marked `(mandatory)` are strictly needed for the script to work as-is. 
+
+Conditions marked `(recommended)` shouldn't crash the program, but you will probably get wonky results. 
+
+> [!TIP]
+> This tool was intentionally built to be modular and adaptable, so if any of those requirements don't work for you, please submit an issue or contact @avgomes on Mattermost so we can customize the behavior of the tool.
+
+#### Navigation table requirements
+
+Requirement: (mandatory) The navigation table is wrapped in `[details=Navigation]`. This will no longer be necessary when the option to provide a text file containing the table is added in the near future.
 ```
-# Navigation
-
 [details=Navigation]
 
 | Level   | Path | Navlink |
@@ -78,50 +86,40 @@ E.g.
 [details=Navigation]
 ```
 
-**Level**:
-* Level 0 items must be standalone pages, like the Home page. They cannot be parents, like Diataxis sections.
-* Diataxis categories must be at Level 1
-* Pages should not be nested more than one level below the previous.
-OK:
+Requirement: (recommended) Level 0 items must be standalone pages, like the Home page. They must not be parent folders.
+Requirement: (mandatory) Diataxis categories must be at Level 1.
 ```
-| 1 | <path> | [<title>](/t/<id>) |
-| 2 | <path> | [<title>](/t/<id>) |
-| 3 | <path> | [<title>](/t/<id>) |
-| 1 | <path> | [<title>](/t/<id>) | # skipping levels going up is ok
-```
-NOT OK:
-```
-| 1 | <path> | [<title>](/t/<id>) |
-| 3 | <path> | [<title>](/t/<id>) | # cannot skip levels going down
+| Level   | Path | Navlink |
+|---------|------|---------|
+| 0 | home | [Home](/t/123) |
+| 1 | tutorial | [Tutorial](/t/123) |
+| 
 ```
 
-**Path**: This is not used, so there are no explicit requirements.
 
-**Navlink**:
-* Accepted: `[Title](/t/123)`
-* Accepted: `[Title](/t/some-slug/123)`
-* Accepted: `Title`
-* Accepted: `[Title](/t/123)`
-* Not accepted: (empty) - this row will be ignored
+Requirement: (mandatory) Pages should not be nested more than one level below the previous.
+    OK:
+    ```
+    | 1 | <path> | [<title>](/t/<id>) |
+    | 2 | <path> | [<title>](/t/<id>) |
+    | 3 | <path> | [<title>](/t/<id>) |
+    | 1 | <path> | [<title>](/t/<id>) | # skipping levels upwards is ok
+    ```
+    NOT OK:
+    ```
+    | 1 | <path> | [<title>](/t/<id>) |
+    | 3 | <path> | [<title>](/t/<id>) | # cannot skip levels downwards
+    ```
 
-#### Other topics
-Below is the ideal Discourse setup for all the sphinx scaffolding to set up smoothly. These conditions don't need to be strictly fulfilled for the tool to run, but there may be some unexpected outcomes like duplicate headings or unnecessary newlines.
+Topics with a Navlink that is empty or points to an external link will simply be ignored. The following example Navlinks will be correctly processed:
+* `[Title](/t/123)` 
+* `[Title](/t/some-slug/123)`
+* `Title` (if this item has children, it will become a folder. Otherwise, it will be ignored.)
+* `[Title](http://discourse.instance.com/t/123)`
+* `[Title](http://discourse.instance.com/some-slug/123)`
 
-**H1 headings**: The docset should be consistent with H1 headings: either all pages have them, or none.
-
-If there are pre-existing H1 headings, they should be the first line of the file, e.g.
-```
-# How to deploy
-
-Rest of the content
-```
-The tool will turn the above example into:
-```
-(how-to-deploy)=
-# How to deploy
-
-Rest of the content
-```
+#### Documentation pages
+(mandatory) The docset should be consistent with **H1 headings**: either all pages have them, or none.
 
 ### Polish or troubleshoot your new Sphinx docs
 
@@ -129,9 +127,9 @@ Once you've run the script and built the HTML docs, you'll probably notice a few
 
 Here's a rough checklist of things to look out for
 * `conf.py`: Edit the product title, links, and any other relevant settings.
-* `index.md` pages: You may want to edit the `toctree`s to reflect a different order or display other titles.
-* All markdown pages: Check the formatting, since there might be some discourse-flavored markdown (e.g. stuff in `[square brackets][/square brackets]`) left over. Edit them manually, or add more formatting checks to the [`replace_discourse_syntax()`](https://github.com/s-makin/discourse-offline-helper/blob/2d9b233fac16bf1045d07ea008cfe3e8e4b65c5d/doh/sphinx_handler.py#L42) function!
-* Check the warnings in the output of the `make run` for common issues like links and cross-references that did not process correctly and files that were not found by the auto-generated `toctree`.
+* `index.md` pages: You may want to edit the `toctree`s to reflect a different order, display other titles, or remove unnecessary inclusions
+* All `.md` pages: Check the formatting, since there might be some discourse-flavored markdown (e.g. stuff in `[square brackets][/square brackets]`) left over. More automatic substitutions are planned.
+* Check the warnings in the output of the `make run` for common issues like links and cross-references that did not process correctly, files that were not found by the auto-generated `toctree`, or code block syntax highlighting tags that aren't valid in Sphinx. (e.g. 'plain')
 
 ## Contribute
 
