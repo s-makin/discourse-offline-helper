@@ -58,7 +58,7 @@ if __name__ == '__main__':
         shutil.rmtree('docs/src/')
         
     # Download and process a Discourse documentation set 
-    discourse_docs = DiscourseHandler(config, test_navtable)
+    discourse_docs = DiscourseHandler(config) #, test_navtable)
 
     discourse_docs.calculate_item_type() # determine if item is a folder, page, or both
     discourse_docs.calculate_filepaths() # calculate local file paths
@@ -67,15 +67,12 @@ if __name__ == '__main__':
     # Convert local discourse docs to a Sphinx/RTD-compatible format (markdown only)
     sphinx_docs = SphinxHandler(discourse_docs, config)
 
-    sphinx_docs.remove_discourse_metadata() # remove timestamp and comments
-
-    sphinx_docs.replace_discourse_syntax() # replace [note] admonitions
-
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
 
     sphinx_docs.update_links() # replace discourse links with local file paths
 
-    if config['generate_h1']:
-        sphinx_docs.generate_h1_headings() # add h1 heading based on 'Navlink' text
+    sphinx_docs.replace_discourse_metadata(truncate_comments=True) # remove timestamp and comments, adds h1 headings.
+
+    sphinx_docs.replace_discourse_syntax() # replace [note] admonitions
 
     sphinx_docs.generate_tocs() # generate toctree for each index file
