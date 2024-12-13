@@ -14,8 +14,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='discourse-offline-helper',
                                      description='Download Discourse docs and convert to Sphinx/RTD markdown.')
     parser.add_argument('--docset', type=str, help='Discourse documentation to download. See config.yaml for options.')
-    parser.add_argument('--docs_directory', type=str, help='Local path to save the downloaded docs.', default='docs/src/')
-    parser.add_argument('--debug', action="store_true", help="Log verbosity")
+    parser.add_argument('--docs_directory', type=str, help='Local path to save the downloaded docs. Default is docs/src/', default='docs/src/')
+    parser.add_argument('--debug', action="store_true", help="Increase log verbosity")
 
     args = parser.parse_args()
 

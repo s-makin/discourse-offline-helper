@@ -33,10 +33,11 @@ Downloads a Discourse documentation set and prepares it for building with the Ca
 
 ## Quickstart
 
-To run convert a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), run `doh/main.py`
+To convert a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)):
 ```
-python3 doh/main.py -docset opensearch
+python3 doh/main.py --docset opensearch
 ```
+> optionally use the `--debug` flag for more detailed logs
 
 When the script has finished running, `cd` into the `docs/` directory and build the starter pack:
 ```
