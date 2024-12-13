@@ -92,7 +92,7 @@ class SphinxHandler:
                     lines = f.readlines()
 
                 updated_lines = []
-                pattern = r"\[([^\]]+)]\(/t/(\d+)\)"
+                pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)\)"
                 for line in lines:
                     new_line = re.sub(pattern, self.__link_replacement, line)
                     updated_lines.append(new_line)

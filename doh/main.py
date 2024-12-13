@@ -1,6 +1,7 @@
 import argparse
 import sys
 import yaml
+import shutil
 from discourse_handler import *
 from sphinx_handler import *
 
@@ -12,8 +13,7 @@ test_navtable = \
 | Level | Path | Navlink |
 |-------|------|---------|
 | 1 | tutorial | [Tutorial](/t/9722) |
-| 2 | t-set-up | [1. Set up the environment](/t/9724/) |
-| 3 | test| [Test](/t/14783) |
+| 2 | t-set-up | [1. Set up the environment](/t/9724) |
 | 1 | how-to | [How To]() |
 | 2 | h-deploy | [Deploy]() |
 | 3 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
@@ -49,6 +49,10 @@ if __name__ == '__main__':
     config = config[args.docset]
     config['docs_directory'] = args.docs_directory
 
+    # TEMPORARY: Delete existing src/ directory
+    if args.docs_directory == 'docs/src/':
+        shutil.rmtree('docs/src/')
+        
     # Download and process a Discourse documentation set 
     discourse_docs = DiscourseHandler(config, test_navtable)
 
