@@ -83,6 +83,7 @@ This would be the discourse topic that contains the Navigation table.
 
 ### Documentation requirements
 
+#### Home page (index topic)
 **Navigation table** is wrapped in `[details=Navigation]` and preceded by `# Navigation` h1 heading. 
 
 E.g.
@@ -112,6 +113,25 @@ E.g.
 * Accepted: `Title`
 * Accepted: `[Title](/t/123)`
 * Not accepted: (empty) - this row will be ignored
+
+#### Other topics
+Below is the ideal Discourse setup for all the sphinx scaffolding to set up smoothly. These conditions don't need to be strictly fulfilled for the tool to run, but there may be some unexpected outcomes like duplicate headings or unnecessary newlines.
+
+**H1 headings**: The docset should be consistent with H1 headings: either all pages have them, or none.
+
+If there are pre-existing H1 headings, they should be the first line of the file, e.g.
+```
+# How to deploy
+
+Rest of the content
+```
+The tool will turn the above example into:
+```
+(how-to-deploy)=
+# How to deploy
+
+Rest of the content
+```
 
 ### Polish or troubleshoot your new Sphinx docs
 
