@@ -30,6 +30,7 @@ class SphinxHandler:
                 # first line contains `user <username> | <timestamp> | #<number>`, which should be removed anyway
                 myst_target = slugify(str(item.filepath.relative_to(self.config['docs_directory']).with_suffix('')))
                 lines[0] = f"({myst_target})=\n"
+                item.myst_target(myst_target)
 
                 # add h1 heading
                 if self.config['generate_h1']:
@@ -90,6 +91,9 @@ class SphinxHandler:
                     line = re.sub(r'\[note.*?positive.*?\]', r'```{tip}', line)  # Replaces [note="information"] with ```{note}
                     line = re.sub(r'\[/note\]', r'```', line)  # Replaces [/note] with ```
 
+                    if '```plain' in line:
+                        line = line.replace('```plain', '```')
+
                     updated_lines.append(line)
 
                 with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
@@ -140,13 +144,18 @@ class SphinxHandler:
     def __link_replacement(self, match):
         text = match.group(1)
         topic_id = match.group(2)
+        anchor = match.group(3)
         
         new_value = ''
         for item in self._discourse_docs._items:
             if item.topic_id == topic_id:
-                new_value = item.filepath.relative_to(self.config['docs_directory']).with_suffix('')
+                new_value = item.myst_target
         
-        return f"[{text}](/{new_value})"
+        replacement = f"[{text}]({new_value})" 
+        if anchor:
+            replacement = f"[{text}]({new_value}#{anchor})"
+        
+        return replacement
 
     def update_links(self):
         """
@@ -163,7 +172,13 @@ class SphinxHandler:
                     lines = f.readlines()
 
                 updated_lines = []
-                pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)\)"
+                # pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)\)" # Matches [text](/t/123)
+                text_part = r"\[([^\]]+)]"                  # Matches [text]
+                path_part = r"\(/t/[^)]*?(\d+)"             # Matches (/t/123) and captures the number
+                anchor_part = r"(?:#([^\)]+))?"             # Matches an optional anchor after the number (#...) and captures it
+
+                pattern = rf"{text_part}{path_part}{anchor_part}\)"
+
                 for line in lines:
                     new_line = re.sub(pattern, self.__link_replacement, line)
                     updated_lines.append(new_line)

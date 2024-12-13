@@ -35,6 +35,9 @@ class DiscourseItem:
     isFolder = False
     isTopic = True
 
+    # Properties set by SphinxHandler
+    myst_target = ''
+
     def __init__(self, navtable_row: dict, configuration) -> None:
 
         self.config = configuration

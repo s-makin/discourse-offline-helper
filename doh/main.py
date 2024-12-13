@@ -60,7 +60,7 @@ if __name__ == '__main__':
         shutil.rmtree('docs/src/')
         
     # Download and process a Discourse documentation set 
-    discourse_docs = DiscourseHandler(config, multipass_navtable)
+    discourse_docs = DiscourseHandler(config)#, multipass_navtable_reduced)
 
     discourse_docs.calculate_item_type() # determine if item is a folder, page, or both
     discourse_docs.calculate_filepaths() # calculate local file paths
@@ -71,9 +71,9 @@ if __name__ == '__main__':
 
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
 
-    sphinx_docs.update_links() # replace discourse links with local file paths
-
     sphinx_docs.replace_discourse_metadata(truncate_comments=True) # remove timestamp and comments, adds h1 headings.
+
+    sphinx_docs.update_links() # replace discourse links with local file paths
 
     sphinx_docs.replace_discourse_syntax() # replace [note] admonitions
 
