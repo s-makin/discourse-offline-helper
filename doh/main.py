@@ -5,6 +5,8 @@ import shutil
 from discourse_handler import *
 from sphinx_handler import *
 
+from correct_navtables import *
+
 CONFIG_FILE = 'doh/config.yaml'
 
 test_navtable = \
@@ -58,7 +60,7 @@ if __name__ == '__main__':
         shutil.rmtree('docs/src/')
         
     # Download and process a Discourse documentation set 
-    discourse_docs = DiscourseHandler(config) #, test_navtable)
+    discourse_docs = DiscourseHandler(config, multipass_navtable)
 
     discourse_docs.calculate_item_type() # determine if item is a folder, page, or both
     discourse_docs.calculate_filepaths() # calculate local file paths

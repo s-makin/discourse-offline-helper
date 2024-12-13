@@ -13,7 +13,7 @@ class SphinxHandler:
         
         The metadata on the first line is in the format `user | timestamp | #`.
         The comments are expected to be separated by a delimiter `-------------------------`.
-        For the home page, the delimiter is `# Navigation`.
+        For the home page, the delimiter is `## Navigation`.
         """
         logging.info("\nRemoving Discourse metadata...")
         for item in self._discourse_docs._items:
@@ -35,10 +35,9 @@ class SphinxHandler:
                 if self.config['generate_h1']:
                     h1_heading = ''
                     if item.title == 'index':
-                        if item.isHomeTopic:
-                            return
-                        # non-root index pages use the name of their parent folder
-                        h1_heading = f"# {item.filepath.parent.name.title()}\n"
+                        if not item.isHomeTopic:
+                            # non-root index pages use the name of their parent folder
+                            h1_heading = f"# {item.filepath.parent.name.title()}\n"
                     else:
                         # normal pages use their title property extracted from the Navlink
                         h1_heading = f"# {item.title}\n"
@@ -55,7 +54,7 @@ class SphinxHandler:
                     if custom_delimiter:
                         comment_delimiter = custom_delimiter
                     elif item.isHomeTopic:
-                        comment_delimiter = '# Navigation'
+                        comment_delimiter = '## Navigation'
                     
                     for line in lines:
                         if comment_delimiter in line:
@@ -134,21 +133,6 @@ class SphinxHandler:
                     self._discourse_docs._items.append(new_item)
 
                     logging.info(f"Created {index_file}.")
-
-    def __generate_h1_heading(self, item):
-
-        if item.isTopic:
-                h1_heading = ''
-                if item.title == 'index':
-                    if item.isHomeTopic:
-                        return
-                    # if it's an index page, its h1 header is the name of its parent folder, capitalized
-                    h1_heading = f"# {item.filepath.parent.name.title()}\n"
-                else:
-                    # normal pages use their title property extracted from the Navlink
-                    h1_heading = f"# {item.title}\n"
-                
-                return h1_heading
 
     def __link_replacement(self, match):
         text = match.group(1)

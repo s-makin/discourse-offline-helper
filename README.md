@@ -103,7 +103,19 @@ E.g.
 **Level**:
 * Level 0 items must be standalone pages, like the Home page. They cannot be parents, like Diataxis sections.
 * Diataxis categories must be at Level 1
-* All levels should be +/- 1 level from each other. E.g. a Level 2 row cannot be followed by a Level 4 row. It must be followed either by Level 3 (one below) or Level 1 (one above). 
+* Pages should not be nested more than one level below the previous.
+OK:
+```
+| 1 | <path> | [<title>](/t/<id>) |
+| 2 | <path> | [<title>](/t/<id>) |
+| 3 | <path> | [<title>](/t/<id>) |
+| 1 | <path> | [<title>](/t/<id>) | # skipping levels going up is ok
+```
+NOT OK:
+```
+| 1 | <path> | [<title>](/t/<id>) |
+| 3 | <path> | [<title>](/t/<id>) | # cannot skip levels going down
+```
 
 **Path**: This is not used, so there are no explicit requirements.
 
