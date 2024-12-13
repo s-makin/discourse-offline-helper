@@ -23,7 +23,7 @@ class DiscourseItem:
     navtable_navlink = ''
 
     isHomeTopic = False
-    isValid = True
+    isValid = True # if False, will not be downloaded
 
     title = ''
     topic_id = ''
@@ -65,7 +65,7 @@ class DiscourseItem:
             self.isHomeTopic = True
 
         # Set filename parameter
-        self.__parse_filename()
+        self.filename = slugify(self.title)
     
     def update_filepath(self, path: Path):
         """
@@ -76,17 +76,7 @@ class DiscourseItem:
         """
         self.filepath = path
         self.filename = path.stem
-        if self.config['use_title_as_filename']:
-            self.title = self.filename
-
-    def __parse_filename(self):
-        """
-        Sets the filename based on the configuration.
-        """
-        if self.config['use_title_as_filename'] or self.navtable_path == '':
-            self.filename = slugify(self.title)
-        else:
-            self.filename = slugify(self.navtable_path)
+        self.title = self.filename
 
     def __parse_navtable_navlink(self):
         """
@@ -206,14 +196,14 @@ class DiscourseHandler:
             For example, the navigation items below:
             | Level   | Path | Navlink |
             |---------|------|---------|
-            | 1 | slug-a   | [Category A](/t/123) |
-            | 2 | slug-a1  | [Page A1]() |
-            | 3 | slug-a11 | [Subpage A11](/t/124) |
+            | 1 | tutorial   | [Tutorial](/t/123) |
+            | 2 | first-time  | [Deploy for the first time]() |
+            | 3 | set-up | [Set up your environment](/t/124) |
 
             are assigned the paths:
-            /category-a
-            /category-a/page-a1
-            /category-a/page-a1/subpage-a11
+            /tutorial
+            /tutorial/deploy-for-the-first-time
+            /tutorial/deploy-for-the-first-time/set-up-your-environment
             """
             stack = []
             for i in range(len(self._items)):

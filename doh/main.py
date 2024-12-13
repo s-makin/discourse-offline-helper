@@ -13,15 +13,9 @@ test_navtable = \
 | Level | Path | Navlink |
 |-------|------|---------|
 | 1 | tutorial | [Tutorial](/t/9722) |
+| 1 | tutorial | [Tutorial](/t/9722) |
 | 2 | t-set-up | [1. Set up the environment](/t/9724) |
-| 1 | how-to | [How To]() |
-| 2 | h-deploy | [Deploy]() |
-| 3 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
-| 2 | h-tls| [TLS encryption](/t/14783) |
-| 3 | h-rotate-tls-ca-certificates   | [Rotate TLS/CA certificates](/t/15422) |
-| 1 | reference | [Reference]() |
-| 1 | test | |
-|  | test2 | |
+\
 [/details]"""
 
 if __name__ == '__main__':
@@ -70,9 +64,10 @@ if __name__ == '__main__':
 
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
 
+    sphinx_docs.update_links() # replace discourse links with local file paths
+
     if config['generate_h1']:
         sphinx_docs.generate_h1_headings() # add h1 heading based on 'Navlink' text
 
-    sphinx_docs.update_links() # replace discourse links with local file paths
 
     sphinx_docs.generate_tocs() # generate toctree for each index file

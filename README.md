@@ -1,26 +1,30 @@
 # discourse-offline-helper (doh)
 
-Features:
-* Download discourse documentation locally into markdown files, conserving the navigation structure
-* Convert downloaded files into a Sphinx-compatible format. This includes:
-  * creating or renaming missing index files
-  * replacing hyperlinks to internal discourse pages with the local filepath (e.g. `[Some guide](/t/123)` becomes `[Some guide](how-to/some-guide)`)
-  * creating h1 headers if the Discourse pages don't already have them
-  * appending a simple toctree to index pages (alphabetical order, `maxdepth 2`)
-  * replacing `[note]` admonitions with `{note}` and `[note=caution]` with `{caution}`
-* Build Sphinx docs with the built-in starter pack
+Downloads a discourse documentation set and transforms into a Canonical Sphinx starter pack-compatible format, ready to build.
 
-## Quickstart
+## Features
+* Creates or renames missing index files
+* Replaces hyperlinks to internal discourse pages with the local filepath (e.g. `[Some guide](/t/123)` becomes `[Some guide](how-to/some-guide)`)
+* Creates h1 headers if the Discourse pages don't already have them
+* Appends a simple toctree to index pages (alphabetical order, `maxdepth 2`)
+* Replaces `[note]` discourse syntax
+* (Planned) Will replace `[tab]` discourse syntax
+* (Planned) Will replace `<href>` anchors with regular markdown headings
+* (Planned) Will autogenerate MyST heading targets
+* (Planned) PDF features
+* (Planned) Package doh module for easier UI
 
-The following instructions will show you how to set up your environment, run the script on a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), and build it locally with the starter pack.
+## Demo
+
+Set up your Python environment, run the script on a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), and build it locally with the starter pack. 
 
 Clone the repo and enter its root directory:
 ```
-git clone git@github.com:a-velasco/offline-helper.git
-cd offline-helper
+git clone git@github.com:s-makin/discourse-offline-helper.git
+cd discourse-offline-helper
 ```
 
-Start a virtual environment (called `demo` in the commands below):
+Start a virtual Python environment (called `demo` in the commands below):
 ```
 python3 -m venv demo
 source demo/bin/activate
@@ -41,7 +45,7 @@ When the script has finished running, `cd` into the `docs/` directory and build 
 cd docs/
 make run
 ```
->[!INFO]
+>![INFO]
 > See the [sphinx starter pack's README](https://github.com/canonical/sphinx-docs-starter-pack/blob/main/README.rst) for more information.
 
 ## Try it on other doc sets
@@ -59,7 +63,7 @@ There are currently several pre-configured Discourse documentation sets that can
 
 ## Configure a new doc set 
 
-To edit an existing doc set or create a new one, see the [`config.yaml`](doh/config.yaml) file.
+To edit an existing doc set or create a new one, edit the [`config.yaml`](doh/config.yaml) file.
 
 ### `config.yaml` parameters
 
@@ -68,16 +72,7 @@ To edit an existing doc set or create a new one, see the [`config.yaml`](doh/con
 `home_topic_id`: Index/overview/home topic ID without '/t/'
 This would be the discourse topic that contains the Navigation table.
 
-`use_title_as_filename`: Determines whether filenames get generated with the navtable 'Path' or with the title extracted from the 'Navlink'.
-E.g. 
-| Level   | Path | Navlink |
-|---------|------|---------|
-| 1 | slug-a   | [Category A](/t/123) |
-
-If True (default), the filename will be `category-a.md`
-If False, the filename will be `slug-a.md`
-
-`generate_h1`: Whether or not to generate H1 headers automatically. Only necessary if your pages don't have a h1 header already.
+`generate_h1`: Whether or not to generate H1 headers automatically. This is necessary if the discourse topics don't already have one.
 
 ### Documentation requirements
 
@@ -99,7 +94,7 @@ E.g.
 
 **Level**: (WIP - expected level structure)
 
-**Path**: (WIP - can be empty, unless config `use_title_as_filename` is false)
+**Path**: (WIP - can be empty)
 
 **Navlink**: (WIP)
 
