@@ -111,7 +111,7 @@ Here's a rough checklist of things to look out for
 * `conf.py`: Edit the product title, links, and any other relevant settings
 * `index.md` pages: You may want to edit the `toctree`s to reflect a different order or display other titles.
 * All markdown pages: Check the formatting.  so it will likely not convert all of the formatting. Certain admonitions and other discourse-flavored markdown elements (i.e. those in `[square brackets][/square brackets]`) might need to be edited manually. Or, you could add more formatting checks to the [`replace_discourse_syntax()`](https://github.com/s-makin/discourse-offline-helper/blob/2d9b233fac16bf1045d07ea008cfe3e8e4b65c5d/doh/sphinx_handler.py#L42) function!
-* Links: Check the warnings in the output of the `make run` for a list of links and cross-references that did not process correctly. 
+* Links: Check the warnings in the output of the `make run` for a list of links and cross-references that did not process correctly.
 
 ## Contribute
 

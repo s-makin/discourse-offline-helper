@@ -165,7 +165,7 @@ class DiscourseHandler:
         # TODO: expect Index as title or path
         index_topic = [x for x in self._items if x.topic_id == self.config['home_topic_id']]
         if not index_topic:
-            index_navlink = f"[Index](/t/{self.config['home_topic_id']})"
+            index_navlink = f"[Home](/t/{self.config['home_topic_id']})"
             index_row = {'Level': '1', 'Path': 'index', 'Navlink': index_navlink}
             self._items.append(DiscourseItem(index_row, self.config))
 
@@ -237,6 +237,9 @@ class DiscourseHandler:
         """
         logging.debug("")
         for item in self._items:
+            if item.isFolder: # create folders explicitly in case of an empty parent folder with no landing page
+                logging.debug(f"\nCreating folder '{item.filepath}'...")
+                item.filepath.mkdir(parents=True, exist_ok=True)
             if item.isTopic:
                 logging.debug(
                     f"\nDownloading '{item.title}' to '{item.filepath}' from URL '{item.url}'...")

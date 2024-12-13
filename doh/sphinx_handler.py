@@ -69,42 +69,11 @@ class SphinxHandler:
                 with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
                         f.writelines(updated_lines)
 
-    def __link_replacement(self, match):
-        text = match.group(1)
-        topic_id = match.group(2)
-        
-        new_value = ''
-        for item in self._discourse_docs._items:
-            if item.topic_id == topic_id:
-                new_value = item.filepath.relative_to(self.config['docs_directory'])
-        
-        return f"[{text}](/{new_value})"
-
-    def update_links(self):
-        """
-        Replaces local discourse links with local path to the equivalent file.
-        """
-        logging.info("\nUpdating internal links...")
-        for item in self._discourse_docs._items:
-            if item.isTopic:
-                lines = []
-                with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
-                    lines = f.readlines()
-
-                updated_lines = []
-                pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)\)"
-                for line in lines:
-                    new_line = re.sub(pattern, self.__link_replacement, line)
-                    updated_lines.append(new_line)
-
-                with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
-                        f.writelines(updated_lines)
-
     def update_index_pages(self):
         """
         Ensures there is an index page for each section.
 
-        Rename home page in DOCS_LOCAL_PATH to `index.md`. 
+        Rename home page in docs_local_path to `index.md`. 
         For each folder, if it has an identically named `.md` file, rename it to `index.md`. Otherwise, create it. 
         """
         logging.info("\nUpdating index pages...")
@@ -112,22 +81,22 @@ class SphinxHandler:
         for item in self._discourse_docs._items:           
             if item.isHomeTopic:
                 # rename to 'index.md'
-                new_path = item.filepath.parent / 'index.md'
-                os.rename(item.filepath.with_suffix('.md'), new_path)
+                new_path = item.filepath.parent / 'index'
+                os.rename(item.filepath.with_suffix('.md'), new_path.with_suffix('.md'))
                 item.update_filepath(new_path)
 
                 logging.debug(f"Renamed {item.filepath} to {new_path}")
             if item.isFolder:
                 if item.isTopic: 
                     # already has index topic; just need to rename
-                    new_path = item.filepath.parent / 'index.md'
+                    new_path = item.filepath.parent / 'index'
                     os.rename(item.filepath.with_suffix('.md'), new_path.with_suffix('.md'))
                     item.update_filepath(new_path)
 
                     logging.debug(f"Renamed {item.filepath} to {new_path}")
                 else: 
                     # does not have an index topic, need to create
-                    index_file = item.filepath / 'index.md'
+                    index_file = item.filepath / 'index'
                     with open(index_file.with_suffix('.md'), 'w', encoding='utf-8') as f:
                             if self.config['generate_h1']:
                                 f.write(f"\n")
@@ -177,7 +146,38 @@ class SphinxHandler:
                         f.writelines(lines)
                     
                     logging.info(f"Added h1 heading {h1_heading} to {item.filepath}")
-                            
+
+    def __link_replacement(self, match):
+        text = match.group(1)
+        topic_id = match.group(2)
+        
+        new_value = ''
+        for item in self._discourse_docs._items:
+            if item.topic_id == topic_id:
+                new_value = item.filepath.relative_to(self.config['docs_directory'])
+        
+        return f"[{text}](/{new_value})"
+
+    def update_links(self):
+        """
+        Replaces local discourse links with local path to the equivalent file.
+        """
+        logging.info("\nUpdating internal links...")
+        for item in self._discourse_docs._items:
+            if item.isTopic:
+                lines = []
+                with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+
+                updated_lines = []
+                pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)\)"
+                for line in lines:
+                    new_line = re.sub(pattern, self.__link_replacement, line)
+                    updated_lines.append(new_line)
+
+                with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
+                        f.writelines(updated_lines)
+
     def generate_tocs(self):
         """
         Generate `toctree` for each index file

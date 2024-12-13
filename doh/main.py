@@ -19,6 +19,7 @@ test_navtable = \
 | 3 | h-deploy-lxd | [Deploy on LXD](/t/14575) |
 | 2 | h-tls| [TLS encryption](/t/14783) |
 | 3 | h-rotate-tls-ca-certificates   | [Rotate TLS/CA certificates](/t/15422) |
+| 1 | reference | [Reference]() |
 | 1 | test | |
 |  | test2 | |
 [/details]"""
@@ -54,7 +55,7 @@ if __name__ == '__main__':
         shutil.rmtree('docs/src/')
         
     # Download and process a Discourse documentation set 
-    discourse_docs = DiscourseHandler(config, test_navtable)
+    discourse_docs = DiscourseHandler(config) #, test_navtable)
 
     discourse_docs.calculate_item_type() # determine if item is a folder, page, or both
     discourse_docs.calculate_filepaths() # calculate local file paths
@@ -64,9 +65,14 @@ if __name__ == '__main__':
     sphinx_docs = SphinxHandler(discourse_docs, config)
 
     sphinx_docs.remove_discourse_metadata() # remove timestamp and comments
+
     sphinx_docs.replace_discourse_syntax() # replace [note] admonitions
-    sphinx_docs.update_links() # replace discourse links with local file paths
+
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
+
     if config['generate_h1']:
         sphinx_docs.generate_h1_headings() # add h1 heading based on 'Navlink' text
+
+    sphinx_docs.update_links() # replace discourse links with local file paths
+
     sphinx_docs.generate_tocs() # generate toctree for each index file
