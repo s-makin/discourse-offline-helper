@@ -36,7 +36,7 @@ To run the script, you must have a Python 3 environment with the dependencies in
 
 To convert a sample documentation set on Discourse ([Charmed OpenSearch](https://charmhub.io/opensearch)), run
 ```
-python3 -m doh -i discourse.charmhub.io -h 9729 --generate_h1
+python3 -m doh -i discourse.charmhub.io -t 9729 --generate_h1
 ```
 > use the `--debug` flag for more detailed logs
 

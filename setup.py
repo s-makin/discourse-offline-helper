@@ -16,7 +16,7 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     packages=["doh"],
-    entry_points={"console_scripts": ["doh=doh.doh:main"]},
+    entry_points={"console_scripts": ["doh=doh.doh:launch"]},
     install_requires=["alive-progress"],
     zip_safe=False,
 )
