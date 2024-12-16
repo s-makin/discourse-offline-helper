@@ -1,13 +1,11 @@
 import argparse
-import sys
 import yaml
 import shutil
-from discourse_handler import *
-from sphinx_handler import *
+from .sphinx_handler import *
 
 CONFIG_FILE = 'doh/config.yaml'
 
-if __name__ == '__main__':
+def launch():
 
     parser = argparse.ArgumentParser(prog='discourse-offline-helper',
                                      description='Download Discourse docs and convert to Sphinx/RTD markdown.')
