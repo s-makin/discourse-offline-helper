@@ -25,3 +25,7 @@ package*.json
 __pycache__
 .idea/
 .vscode/
+
+# doh files
+/docs/src/
+/docs/.sphinx/

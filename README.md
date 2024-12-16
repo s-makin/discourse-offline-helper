@@ -18,14 +18,13 @@ Downloads a Discourse documentation set and prepares it for building with the Ca
 
 <summary>Planned</summary>
 
-* Fix issue with cross-referencing other headings
-* Use MyST heading targets for cross-references
+* Fix issue with cross-referencing other headings ([#17](https://github.com/s-makin/discourse-offline-helper/issues/17))
 * Improve the UI
-    * add option to use text file with navtable as the input
+    * add option to use text file with navtable as the input ([#18](https://github.com/s-makin/discourse-offline-helper/issues/18))
     * make function sequences and dependencies more transparent
-    * snap the `doh` module to remove python requirement (`sudo snap install doh & doh -docset <product>`)
-* Automatically replace `[tab]` discourse syntax
-* Automatically replace `<href>` anchors with regular markdown headings
+    * snap the `doh` module to remove python requirement (`sudo snap install doh & doh -docset <product>`) ([#20](https://github.com/s-makin/discourse-offline-helper/issues/20))
+* Automatically replace `[tab]` discourse syntax ([#21](https://github.com/s-makin/discourse-offline-helper/issues/20))
+* Automatically replace `<href>` anchors with regular markdown headings ([#22](https://github.com/s-makin/discourse-offline-helper/issues/22))
 * PDF features
 * ...
 
