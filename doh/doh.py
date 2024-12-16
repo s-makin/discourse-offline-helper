@@ -7,7 +7,7 @@ def launch():
     parser = argparse.ArgumentParser(prog='discourse-offline-helper',
                                      description='Download Discourse docs and convert to Sphinx/RTD markdown.')
     parser.add_argument('-i', '--instance', type=str, help="Discourse instance to download from. E.g. 'discourse.ubuntu.com'", required=True)
-    parser.add_argument('-h', '--home_topic_id', type=str, help='Topic ID of home page containing navigation table.', required=True)
+    parser.add_argument('-t', '--home_topic_id', type=str, help='Topic ID of home page containing navigation table.', required=True)
     parser.add_argument('-d', '--docs_directory', type=str, help='Local path to save the downloaded docs. Default is docs/src/', default='docs/src/')
     parser.add_argument('--generate_h1', action="store_true", help='Generate h1 headings from topic titles.')
     parser.add_argument('--debug', action="store_true", help="Increase log verbosity")
