@@ -1,15 +1,15 @@
 # discourse-offline-helper (doh)
 
-Downloads a Discourse documentation set and prepares it for building with the Canonical Sphinx starter pack.
+_Downloads a Discourse documentation set and prepares it for building with the Canonical Sphinx starter pack._
 
 > [!WARNING]
-> This tool is under active development and may not work correctly on all documentation sets.
+> This tool is under active development and not fully stable.
 > If you'd like to troubleshoot or customize this tool for a particular doc set, don't hesitate to contact `@avgomes` on Mattermost.
 
 ## Features
 * Downloads raw markdown files locally
-* Creates or renames missing index files
-* Replaces hyperlinks to internal discourse pages with the local filepath (e.g. `[Some guide](/t/123)` becomes `[Some guide](how-to/some-guide)`)
+* Creates missing index files
+* Replaces discourse cross-references with the local filepath (e.g. `[Some guide](/t/123)` becomes `[Some guide](how-to/some-guide)`)
 * Creates h1 headers if the Discourse pages don't already have them
 * Appends a simple toctree to index pages (alphabetical order, `maxdepth 2`)
 * Replaces `[note]` discourse syntax
@@ -32,7 +32,9 @@ Downloads a Discourse documentation set and prepares it for building with the Ca
 
 ## Quickstart
 
-To convert a small documentation set ([Charmed OpenSearch](https://charmhub.io/opensearch)), run
+To run the script, you must have a Python 3 environment with the dependencies in `requirements.txt` installed. In the near future, `discourse-offline-helper` will be a snap ([#20](https://github.com/s-makin/discourse-offline-helper/issues/20)).
+
+To convert a sample documentation set on Discourse ([Charmed OpenSearch](https://charmhub.io/opensearch)), run
 ```
 python3 doh/main.py --docset opensearch
 ```
@@ -67,8 +69,6 @@ Create a new entry with the name of the docset and insert values for:
 ### Documentation requirements
 
 This tool takes into account several common variations between different Discourse sets, but not all. For it to work as smoothly as possible, the documentation set must fulfill a few requirements.
-
-Conditions marked `(recommended)` shouldn't crash the program, but you will probably get wonky results. 
 
 > [!TIP]
 > This tool was intentionally built to be modular and adaptable, so if any of those requirements don't work for you, please submit an issue or contact @avgomes on Mattermost so we can customize the behavior of the tool for you.
