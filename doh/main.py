@@ -5,8 +5,6 @@ import shutil
 from discourse_handler import *
 from sphinx_handler import *
 
-from correct_navtables import *
-
 CONFIG_FILE = 'doh/config.yaml'
 
 if __name__ == '__main__':
