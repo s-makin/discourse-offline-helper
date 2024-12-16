@@ -90,6 +90,7 @@ def download_topic(path: str, url : str = None) -> None:
         f.write(text)
 
     logging.info(f"Downloaded {output_path}.")
+
 class DiscourseItem:
     """
     A discourse navigation item represented by one row of the navtable.
@@ -162,7 +163,7 @@ class DiscourseItem:
         # Get 'Navlink' from navigation table
         self.navtable_navlink = navtable_row['Navlink']
         if not self.navtable_navlink:
-            self.isValid = False # item is not valid if 'Navlink' column is empty
+            self.isValid = False
             return
 
         # Parse title, topic ID, and URL from the 'Navlink' column
