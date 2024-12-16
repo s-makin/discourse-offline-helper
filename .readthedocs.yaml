@@ -11,22 +11,20 @@ build:
   tools:
     python: "3.11"
   jobs:
-    post_checkout:
-      - python3 .sphinx/build_requirements.py
-  apt_packages:
-    - distro-info
+    pre_install:
+    - git fetch --unshallow || true
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   builder: dirhtml
-  configuration: conf.py
-  fail_on_warning: false
+  configuration: docs/conf.py
+  fail_on_warning: true
 
 # If using Sphinx, optionally build your docs in additional formats such as PDF
 formats:
-   - pdf
+- pdf
 
 # Optionally declare the Python requirements required to build your docs
 python:
-   install:
-   - requirements: .sphinx/requirements.txt
+  install:
+  - requirements: docs/.sphinx/requirements.txt

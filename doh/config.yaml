@@ -1,0 +1,37 @@
+---
+multipass:
+  instance: discourse.ubuntu.com
+  home_topic_id: "8294"
+  generate_h1: true
+landscape:
+  instance: discourse.ubuntu.com
+  home_topic_id: "23070"
+  generate_h1: true
+mir:
+  instance: discourse.ubuntu.com
+  home_topic_id: "27559"
+  generate_h1: true
+ubuntu_core:
+  instance: discourse.ubuntu.com
+  home_topic_id: "19764"
+  generate_h1: true
+snap:
+  instance: forum.snapcraft.io
+  home_topic_id: "11127"
+  generate_h1: true
+kafka:
+  instance: discourse.charmhub.io
+  home_topic_id: "10288"
+  generate_h1: false
+mongodb:
+  instance: discourse.charmhub.io
+  home_topic_id: "12461"
+  generate_h1: false
+opensearch:
+  instance: discourse.charmhub.io
+  home_topic_id: "9729"
+  generate_h1: false
+postgresql:
+  instance: discourse.charmhub.io
+  home_topic_id: "9710"
+  generate_h1: false
