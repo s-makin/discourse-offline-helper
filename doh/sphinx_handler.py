@@ -73,10 +73,9 @@ class SphinxHandler:
                 with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
                         f.writelines(content_before_comments)
 
-    def replace_discourse_syntax(self):
+    def replace_discourse_notes(self):
         """
-        Replaces markdown elements with Discourse syntax (i.e., square brackets) and replaces them with Sphinx/RTD 
-        or regular markdown equivalents.
+        Replaces admonitions with Discourse syntax (i.e., square brackets) and replaces them with MyST admonitions.
 
         Notes
         -----
