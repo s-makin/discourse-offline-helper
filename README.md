@@ -66,18 +66,16 @@ Create a new entry with the name of the docset and insert values for:
 
 ### Documentation requirements
 
-This tool takes into account several common variations between different Discourse sets, but not all. In order for it to work as smoothly as possible, there are a few simple requirements that the documentation set must fulfill.
-
-Conditions marked `(mandatory)` are strictly needed for the script to work as-is. 
+This tool takes into account several common variations between different Discourse sets, but not all. For it to work as smoothly as possible, the documentation set must fulfill a few requirements.
 
 Conditions marked `(recommended)` shouldn't crash the program, but you will probably get wonky results. 
 
 > [!TIP]
-> This tool was intentionally built to be modular and adaptable, so if any of those requirements don't work for you, please submit an issue or contact @avgomes on Mattermost so we can customize the behavior of the tool.
+> This tool was intentionally built to be modular and adaptable, so if any of those requirements don't work for you, please submit an issue or contact @avgomes on Mattermost so we can customize the behavior of the tool for you.
 
 #### Navigation table requirements
 
-Requirement: (mandatory) The navigation table is wrapped in `[details=Navigation]`. This will no longer be necessary when the option to provide a text file containing the table is added in the near future.
+**Requirement**: (mandatory) The navigation table is wrapped in `[details=Navigation]`. 
 ```
 [details=Navigation]
 
@@ -88,51 +86,50 @@ Requirement: (mandatory) The navigation table is wrapped in `[details=Navigation
 
 [details=Navigation]
 ```
-##### Levels and nesting
-Requirement: (recommended) If you have Level 0 items, they must be standalone pages, like the Home page. They must not be parent folders.
-Requirement: (mandatory) Diataxis categories must be at Level 1.
 
-    Example of a valid navigation table structure:
-    ```
+There will soon be an option to wrap it in a comment instead, or use a text file containing your navtable.
+
+**Requirement**: (mandatory) If you have Level 0 items, they must be standalone pages, like the Home page. **They must not be parent folders**, such as the Diataxis sections.
+
+Example of a valid navigation table structure:
+```
     | Level   | Path | Navlink |
     |---------|------|---------|
     | 0 | home | [Home](/t/123) |               --> OK: standalone page at Level 0    
     | 1 | tutorial | [Tutorial](/t/124) |       --> OK: top-level parent folder at Level 1   
     | 2 | get-started | [Get started](/t/125) | --> OK: nested under a Level 1 parent   
     | 1 | some-other-page | [Some other page](/t/129) | --> OK: standalone page at Level 1
-
-    ```
-    Example of a non-valid navigation structure:
-    ```
-    | 0 | tutorial | [Tutorial](/t/124) |       --> NOT OK: top-level parent folder at Level 0  
+```
+Example of a non-valid navigation structure:
+```
+    | 0 | tutorial | [Tutorial](/t/124) |       --> NOT OK: parent folder at Level 0  
     | 1 | get-started | [Get started](/t/125) | --> NOT OK: nested under a Level 0 parent   
-    ```
+```
 
-Requirement: (mandatory) Pages should not be nested more than one level below the previous.
-    Example of a correct Level sequence:
-    ```
+**Requirement**: (mandatory) Pages should not be nested more than one level below the previous.
+Example of a correct Level sequence:
+```
     | 1 | <path> | [<title>](/t/<id>) |
     | 2 | <path> | [<title>](/t/<id>) |
     | 3 | <path> | [<title>](/t/<id>) |
-    | 1 | <path> | [<title>](/t/<id>) | # skipping levels upwards is ok
-    ```
-    Example of an incorrect Level sequence:
-    ```
+    | 1 | <path> | [<title>](/t/<id>) | # skipping levels outwards is ok
+```
+Example of an incorrect Level sequence:
+```
     | 1 | <path> | [<title>](/t/<id>) |
-    | 3 | <path> | [<title>](/t/<id>) | # cannot skip levels downwards
-    ```
+    | 3 | <path> | [<title>](/t/<id>) | # cannot skip levels inwards
+```
 
-##### Navlink
+> [!NOTE]
+> Topics with a Navlink that is empty or points to an external link will simply be ignored. The following example Navlinks will be correctly processed:
+> * `[Title](/t/123)` 
+> * `[Title](/t/some-slug/123)`
+> * `Title`
+> * `[Title](http://discourse.instance.com/t/123)`
+> * `[Title](http://discourse.instance.com/some-slug/123)`
 
-Topics with a Navlink that is empty or points to an external link will simply be ignored. The following example Navlinks will be correctly processed:
-* `[Title](/t/123)` 
-* `[Title](/t/some-slug/123)`
-* `Title` (if this item has children, it will become a folder. Otherwise, it will be ignored.)
-* `[Title](http://discourse.instance.com/t/123)`
-* `[Title](http://discourse.instance.com/some-slug/123)`
-
-#### Documentation pages
-(mandatory) The docset should be consistent with **H1 headings**: either all pages have them, or none.
+#### Other requirements
+**Requirement**: (mandatory) The docset should be consistent with **H1 headings**: either all pages have them, or none.
 
 ### Polish or troubleshoot your new Sphinx docs
 
