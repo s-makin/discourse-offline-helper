@@ -1,21 +1,35 @@
 import argparse
-import sys
-import yaml
 import shutil
-from discourse_handler import *
-from sphinx_handler import *
+from .sphinx_handler import *
 
-CONFIG_FILE = 'doh/config.yaml'
-
-if __name__ == '__main__':
+def launch():
 
     parser = argparse.ArgumentParser(prog='discourse-offline-helper',
                                      description='Download Discourse docs and convert to Sphinx/RTD markdown.')
-    parser.add_argument('--docset', type=str, help='Discourse documentation to download. See config.yaml for options.')
-    parser.add_argument('--docs_directory', type=str, help='Local path to save the downloaded docs. Default is docs/src/', default='docs/src/')
+    parser.add_argument('-i', '--instance', type=str, help="Discourse instance to download from. E.g. 'discourse.ubuntu.com'", required=True)
+    parser.add_argument('-t', '--home_topic_id', type=str, help='Topic ID of home page containing navigation table.', required=True)
+    parser.add_argument('-d', '--docs_directory', type=str, help='Local path to save the downloaded docs. Default is docs/src/', default='docs/src/')
+    parser.add_argument('--generate_h1', action="store_true", help='Generate h1 headings from topic titles.')
     parser.add_argument('--debug', action="store_true", help="Increase log verbosity")
 
     args = parser.parse_args()
+
+    config = {}
+    instance = args.instance
+    if '://' in instance:
+        instance = instance.split('://')[1]
+    if 'www.' in instance:
+        instance = instance.split('www.')[1]
+    config['instance'] = args.instance
+
+    home_topic_id = args.home_topic_id
+    if not home_topic_id.isdigit():
+        sys.exit("ERROR: --home_topic_id must be a number. E.g. '1234'.")
+    config['home_topic_id'] = args.home_topic_id
+
+    config['generate_h1'] = args.generate_h1
+
+    config['docs_directory'] = args.docs_directory
 
     logging_level = logging.INFO
     if args.debug: 
@@ -25,17 +39,6 @@ if __name__ == '__main__':
         format="%(message)s",
         level=logging_level     
     )
-
-    # Load config.yaml and extract data
-    with open(CONFIG_FILE) as config_file:
-        config = yaml.safe_load(config_file)
-
-    if args.docset not in config:
-        logging.error(f"ERROR: Documentation set '{args.docset}' not found in config.yaml. Exiting program.")
-        sys.exit(1)
-
-    config = config[args.docset]
-    config['docs_directory'] = args.docs_directory
 
     # Uncomment to delete the existing docs directory each time the script is run
     # if os.path.exists(args.docs_directory):

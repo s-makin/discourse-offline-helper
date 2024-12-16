@@ -1,6 +1,6 @@
 # discourse-offline-helper (doh)
 
-_Downloads a Discourse documentation set and prepares it for building with the Canonical Sphinx starter pack._
+_Downloads a Discourse documentation set and prepares it for PDF generation with the Canonical Sphinx starter pack._
 
 > [!WARNING]
 > This tool is under active development and not fully stable.
@@ -25,7 +25,7 @@ _Downloads a Discourse documentation set and prepares it for building with the C
     * snap the `doh` module to remove python requirement (`sudo snap install doh & doh -docset <product>`) ([#20](https://github.com/s-makin/discourse-offline-helper/issues/20))
 * Automatically replace `[tab]` discourse syntax ([#21](https://github.com/s-makin/discourse-offline-helper/issues/20))
 * Automatically replace `<href>` anchors with regular markdown headings ([#22](https://github.com/s-makin/discourse-offline-helper/issues/22))
-* PDF features
+* Features for PDF generation
 * ...
 
 </details>
@@ -36,7 +36,7 @@ To run the script, you must have a Python 3 environment with the dependencies in
 
 To convert a sample documentation set on Discourse ([Charmed OpenSearch](https://charmhub.io/opensearch)), run
 ```
-python3 doh/main.py --docset opensearch
+python3 -m doh -i discourse.charmhub.io -t 9729 --generate_h1
 ```
 > use the `--debug` flag for more detailed logs
 

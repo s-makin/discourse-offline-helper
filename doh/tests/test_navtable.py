@@ -1,7 +1,7 @@
 import unittest
 
 from test_data import *
-from main import *
+from doh.doh import *
 
 class NavigationParser(unittest.TestCase):
     def test_parse_navtable(self):

@@ -1,4 +1,4 @@
-from discourse_handler import *
+from .discourse_handler import *
 import os
 
 class SphinxHandler:
