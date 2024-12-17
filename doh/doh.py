@@ -4,11 +4,12 @@ from .sphinx_handler import *
 
 def launch():
 
-    parser = argparse.ArgumentParser(prog='discourse-offline-helper',
+    parser = argparse.ArgumentParser(prog='discourse-offline-helper (doh)',
                                      description='Download Discourse docs and convert to Sphinx/RTD markdown.')
     parser.add_argument('-i', '--instance', type=str, help="Discourse instance to download from. E.g. 'discourse.ubuntu.com'", required=True)
-    parser.add_argument('-t', '--home_topic_id', type=str, help='Topic ID of home page containing navigation table.', required=True)
+    parser.add_argument('-t', '--home_topic_id', type=str, help="Topic ID of home page containing navigation table. E.g. '123'", required=True)
     parser.add_argument('-d', '--docs_directory', type=str, help='Local path to save the downloaded docs. Default is docs/src/', default='docs/src/')
+    parser.add_argument('--navtable', type=str, help='Path to a .md or .txt file with a custom navigation table.', default=None)
     parser.add_argument('--generate_h1', action="store_true", help='Generate h1 headings from topic titles.')
     parser.add_argument('--debug', action="store_true", help="Increase log verbosity")
 
@@ -44,8 +45,15 @@ def launch():
     # if os.path.exists(args.docs_directory):
     #     shutil.rmtree(args.docs_directory)
         
-    # Download and process a Discourse documentation set 
-    discourse_docs = DiscourseHandler(config)
+    # Download and process a Discourse documentation set
+    discourse_docs = None
+    if args.navtable:
+        navtable = ""
+        with open(args.navtable, 'r') as f:
+            navtable = f.read()
+        discourse_docs = DiscourseHandler(config, navtable)
+    else:
+        discourse_docs = DiscourseHandler(config)
 
     discourse_docs.calculate_item_type() # determine if item is a folder, page, or both
     discourse_docs.calculate_filepaths() # calculate local file paths

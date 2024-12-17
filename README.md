@@ -50,21 +50,13 @@ make run
 
 ### Try it on other doc sets
 
-There are currently several pre-configured Discourse documentation sets that can be passed in as `--docset` arguments:
-* `multipass`
-* `landscape`
-* `mongodb`
-* `opensearch`
-* `postgresql`
-
-## Configure a new doc set 
-
-To edit an existing doc set or create a new one, edit the [`config.yaml`](doh/config.yaml) file.
-
-Create a new entry with the name of the docset and insert values for:
-* `discourse_instance`: Discourse instance without 'http://'
-* `home_topic_id`: Index/overview/home topic ID without '/t/'. This would be the discourse topic that contains the Navigation table.
-* `generate_h1`: Whether or not to generate H1 headers automatically. This is necessary if the discourse topics don't already have one.
+`doh` takes the following arguments:
+* `-i`, `--instance`: Discourse instance to download from. E.g. `discourse.ubuntu.com`
+* `-t`, `--home_topic_id`: Topic ID of home page containing navigation table. E.g. `123`
+* `--generate_h1`: Generate h1 headings from topic titles. Use this flag if the **raw markdown** of your docs doesn't contain the title in a H1 header
+* (Optional) `-d`, `--docs_directory`: Local path to save the downloaded docs. Default is `docs/src/`.
+* (Optional) `--navtable`: Path to a .md or .txt file with a custom navigation table. Use this option if you need to restructure your navtable to fulfill the [Documentation requirements](#documentation-requirements).
+* (Optional) `--debug`: Increase log verbosity
 
 ### Documentation requirements
 
