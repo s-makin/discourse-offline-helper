@@ -163,7 +163,7 @@ class DiscourseItem:
         # Get 'Navlink' from navigation table
         self.navtable_navlink = navtable_row['Navlink']
         if not self.navtable_navlink:
-            self.isValid = False
+            self.isValid = False # item is not valid if 'Navlink' column is empty
             return
 
         # Parse title, topic ID, and URL from the 'Navlink' column
