@@ -28,7 +28,35 @@ def get_raw_markdown(url: str) -> str:
 
     return response.text
 
-def parse_discourse_navigation_table(index_topic_markdown: str) -> list:
+def search_for_navtable(text: str) -> str:
+    """
+    Searches for a Discourse navigation table in a raw markdown string.
+
+    Parameters
+    ----------
+    text : str
+        Raw markdown content of a Discourse topic.
+
+    Returns
+    -------
+    str
+        The navigation table content if found, otherwise an empty string.
+    """
+ 
+    # Look for '[details=Navigation]'\n and \n'[/details]'
+    match = re.search(
+        r"\[details=Navigation]\n(.*?)\n\[\/details]",
+        text,
+        flags=re.DOTALL,
+    )
+
+    if not match:
+        return ""
+    
+    # Return content inside markers (i.e. the navtable)
+    return match.group(1).strip()
+
+def parse_discourse_navigation_table(index_topic_markdown: str, search=True) -> list:
     """
     Extracts the navigation table from a raw Discourse topic.
 
@@ -44,24 +72,24 @@ def parse_discourse_navigation_table(index_topic_markdown: str) -> list:
         Each dictionary contains the 'Level', 'Path', and 'Navlink' keys, 
         e.g. [{'Level': '1', 'Path': 'slug-a', 'Navlink': '[Page A](/t/123)'}].
     """
-    # Look for '[details=Navigation]'\n and \n'[/details]'
-    match = re.search(
-        r"\[details=Navigation]\n(.*?)\n\[\/details]",
-        index_topic_markdown,
-        flags=re.DOTALL,
-    )
-    if not match:
-        logging.error("ERROR: No navigation table found in index topic. Exiting program.")
-        sys.exit(1)
-    
-    # Extract content inside `[details]` markers (i.e. the navtable)
-    table = match.group(1).strip()
-
+   
+    # Search for markers surrounding the navigation table
+    table = ""
+    if search:
+        table = search_for_navtable(index_topic_markdown)
+        if not table:
+            sys.exit("ERROR: Navigation table not found. Exiting program.")
+    else:
+        table = index_topic_markdown
+        
     # Convert Markdown table to list[dict[str, str]] by parsing as CSV
     # (https://stackoverflow.com/a/78254495)
     rows: list[dict] = list(csv.DictReader(table.split("\n"), delimiter="|"))
 
-    # Remove row after heading (e.g. "|---|---|---|")
+    if not rows:
+        sys.exit("ERROR: Navigation table is seemingly empty. Exiting program.")
+
+    # Remove row after heading ("|---|---|---|")
     rows = rows[1:]
 
     navigation_table: list[dict[str, str]] = [
@@ -251,17 +279,20 @@ class DiscourseHandler:
 
     def __generate_items_list(self, index_topic_raw: str = '') -> None:
         """
-        Populates :param self._items: with :class:`DiscourseItem` objects generated from the navigation table.
+        Populates `_items` with `DiscourseItem` objects generated from the navigation table.
         """
         if not index_topic_raw:
             if not self.config['home_topic_id'].isdigit():
                 raise ValueError(f"Index topic ID '{self.config['home_topic_id']}' contains non-digit characters. Make sure to exclude '/t/'.")
+            
             self._index_topic_url = f"https://{self.config['instance']}/raw/{self.config['home_topic_id']}"
             index_topic_raw = get_raw_markdown(self._index_topic_url)
 
             logging.info(f"\nParsing navigation table in index topic {self._index_topic_url}...")
             
-        navtable_raw = parse_discourse_navigation_table(index_topic_raw)
+            navtable_raw = parse_discourse_navigation_table(index_topic_raw)
+        else:
+            navtable_raw = parse_discourse_navigation_table(index_topic_raw, search=False)
 
         logging.info(f"\nGenerating discourse navigation items...")
         for row in navtable_raw:
@@ -273,7 +304,6 @@ class DiscourseHandler:
             self._items.append(item)
 
         # If index/home page was not in the navtable, add to items manually
-        # TODO: expect Index as title or path
         index_topic = [x for x in self._items if x.topic_id == self.config['home_topic_id']]
         if not index_topic:
             index_navlink = f"[Home](/t/{self.config['home_topic_id']})"
