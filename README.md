@@ -32,8 +32,8 @@ _Downloads a Discourse documentation set and prepares it for PDF generation with
 
 ## Quickstart
 
-To run the script, you must have either: 
-- a Python 3 environment with the dependencies in `requirements.txt` installed
+To run the script, you must either: 
+- configure a Python 3 environment with the dependencies in `requirements.txt` installed
 - or [download the executable](https://github.com/s-makin/discourse-offline-helper/releases/tag/v0.0.1) (currently only for Ubuntu 24.04 on amd64)
 
 To convert a sample documentation set on Discourse ([Charmed OpenSearch](https://charmhub.io/opensearch)), run
