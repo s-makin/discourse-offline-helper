@@ -1,6 +1,6 @@
 import unittest
 
-from test_data import *
+from doh.tests.test_data.navtables import *
 from doh.doh import *
 
 class ToctreeGeneration(unittest.TestCase):
