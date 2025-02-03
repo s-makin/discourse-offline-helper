@@ -147,7 +147,53 @@ class SphinxHandler:
 
                     self._discourse_docs._items.append(new_item)
 
-                    logging.info(f"Created {index_file}.")
+                    logging.debug(f"Created {index_file}.")
+
+    def __href_heading_replacement(self, line):
+        pattern = r'<a href="#[^"]*"><(h[1-6]) id="[^"]*">\s*(.*?)\s*</\1></a>'
+        new_line = re.sub(pattern, lambda m: f"{'#' * int(m.group(1)[1])} {m.group(2)}", line)
+
+        line_changed = new_line != line
+        return new_line, line_changed
+
+    def replace_href_anchors(self):
+        """
+        Replaces headings with manual href anchors with normal markdown headings.
+        Example input: <a href="#heading--parameters"><h2 id="heading--parameters"> Set parameters </h2></a>
+        Example output: ## Set parameters
+
+        Returns
+        -------
+        bool
+            True if any changes were made, False otherwise
+        """
+        logging.info("\nUpdating headings with href anchors...")
+        any_changes = False
+        
+        for item in self._discourse_docs._items:
+            if item.isTopic:
+                lines = []
+                if not item.filepath.with_suffix('.md').exists():
+                    logging.error(f"ERROR: File {item.filepath} not found. Exiting program")
+                    sys.exit(1)
+                with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+
+                updated_lines = []
+                file_changed = False
+                
+                for line in lines:
+                    new_line, line_changed = self.__href_heading_replacement(line)
+                    updated_lines.append(new_line)
+                    file_changed = file_changed or line_changed
+
+                if file_changed:
+                    logging.debug(f"Replaced href anchor headings in {item.filepath}")
+                    any_changes = True
+                    with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
+                        f.writelines(updated_lines)
+
+        return any_changes
 
     def __link_replacement(self, match):
         text = match.group(1)
@@ -207,5 +253,5 @@ class SphinxHandler:
                         f.write("*\n")
                         f.write("*/index\n")
 
-                print(f"Created toctree for {item.filepath}")
+                logging.debug(f"Created toctree for {item.filepath}")
 

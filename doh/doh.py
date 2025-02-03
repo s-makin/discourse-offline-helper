@@ -63,7 +63,10 @@ def launch():
     sphinx_docs = SphinxHandler(discourse_docs, config)
 
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
+
+    sphinx_docs.replace_href_anchors() # replace headings with <a href=...
     sphinx_docs.update_links() # replace discourse links with local file paths
+
     sphinx_docs.replace_discourse_metadata(truncate_comments=True) # remove timestamp and comments, adds h1 headings.
     sphinx_docs.replace_discourse_notes() # replace [note] admonitions
     sphinx_docs.generate_tocs() # generate toctree for each index file
