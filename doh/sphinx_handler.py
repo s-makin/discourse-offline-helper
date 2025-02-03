@@ -189,17 +189,17 @@ class SphinxHandler:
         """
         logging.info("\nGenerating toctrees for index files...")
 
-        toctree_directives = f"\n```{{toctree}}\n:hidden:\n:titlesonly:\n:maxdepth: 2\n:glob:\n\n"
+        toctree_directives = f"\n```{{toctree}}\n:titlesonly:\n:maxdepth: 2\n:glob:\n\n"
         for item in self._discourse_docs._items:
             if item.title == 'index' or item.isHomeTopic:
                 if item.isHomeTopic:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                         f.write(toctree_directives)
                         f.write("Home <self>\n")
-                        f.write("/tutorial*/index\n")
-                        f.write("/how*/index\n")
-                        f.write("/reference*/index\n")
-                        f.write("/explanation*/index\n")
+                        f.write("tutorial*/index\n")
+                        f.write("how*/index\n")
+                        f.write("reference*/index\n")
+                        f.write("explanation*/index\n")
                         f.write("*\n")
                 else:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
