@@ -133,11 +133,35 @@ Example of an incorrect Level sequence:
 
 Once you've run the script and built the HTML docs, you'll probably notice a few things that still need some polishing - maybe some formatting is off or the navigation doesn't show up as expected.
 
-Here's a rough checklist of things to look out for
-* `conf.py`: Edit the product title, links, and any other relevant settings.
+Here's a checklist of things to look out for:
+* `conf.py`: 
+  * **Important**: For myst cross-references to work, you must add the line `myst_heading_anchors = 4`. 
+  * Edit the product title, links, and any other relevant settings.
 * `index.md` pages: You may want to edit the `toctree`s to reflect a different order, display other titles, or remove unnecessary inclusions
 * All `.md` pages: Check the formatting, since there might be some discourse-flavored markdown (e.g. stuff in `[square brackets][/square brackets]`) left over. More automatic substitutions are planned.
-* Check the warnings in the output of the `make run` for common issues like links and cross-references that did not process correctly, files that were not found by the auto-generated `toctree`, or code block syntax highlighting tags that aren't valid in Sphinx. (e.g. 'plain')
+* Check the warnings in the output of the `make run` for common issues like links and cross-references that did not process correctly (see next section about [cross-references](#cross-references-and-links)), files that were not found by the auto-generated `toctree`, or code block syntax highlighting tags that aren't valid in Sphinx. (e.g. 'plain').
+
+#### Cross-references and links
+You will likely get several Sphinx build errors related to myst cross-reference targets. This is expected! There will be a few links that need to be fixed manually.
+
+Here are some of the link-related warnings and fixes:
+
+**Mismatched anchor**
+```shell
+WARNING: 'myst' cross-reference target not found: 'normal-looking-anchor'
+```
+Reason: This is probably because that anchor used to reference a manually created HTML heading. This means that it used to be `#heading--normal-looking-anchor`. The script automatically [replaces HTML headings with markdown ones](https://github.com/s-makin/discourse-offline-helper/pull/30), and removes the `heading--` prefix from the links. But the anchor you're left with may still not be a direct match with the heading name.
+
+Fix: Manually replace that link with an anchor that corresponds to the actual name of the heading. See [this internal document](https://docs.google.com/document/d/1g56unMuhh5RcgfYew2c3AEClaBjYD9L5toF5xn3F5WY/edit?tab=t.0#heading=h.evr6ovkd4cbp) for more help finguring out the right heading anchor.
+
+**Invalid topic ID**
+```shell
+WARNING: 'myst' cross-reference target not found: ''
+WARNING: 'myst' cross-reference target not found: '/'
+```
+Reason: The Discourse link (`/t/123`) references a page that is not in that documentation set's navtable, so the script doesn't know about it.
+
+Fix: Manually replace the reference with the full URL (`https://discourse.../t/123`).
 
 ## Contribute
 
