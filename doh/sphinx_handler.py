@@ -183,9 +183,11 @@ class SphinxHandler:
                 file_changed = False
                 
                 for line in lines:
-                    new_line, line_changed = self.__href_heading_replacement(line)
+                    new_line, line_changed = self.__href_heading_replacement(line) # replace HTML with markdown heading
+                    new_line = new_line.replace('#heading--', '#') # remove prefix in links that start with '#heading--'
+
                     updated_lines.append(new_line)
-                    file_changed = file_changed or line_changed
+                    file_changed = file_changed or line_changed or line != new_line
 
                 if file_changed:
                     logging.debug(f"Replaced href anchor headings in {item.filepath}")
@@ -221,7 +223,7 @@ class SphinxHandler:
                     lines = f.readlines()
 
                 updated_lines = []
-                pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)\)"
+                pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)[^)]*\)"
                 for line in lines:
                     new_line = re.sub(pattern, self.__link_replacement, line)
                     updated_lines.append(new_line)
