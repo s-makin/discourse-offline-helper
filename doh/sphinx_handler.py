@@ -81,7 +81,6 @@ class SphinxHandler:
         -----
         The following replacements are made:
         - `[note]` and `[/note]` -> ```{note}``` for default, caution, information, and positive notes.
-        - TODO: <href> anchors
         - TODO: [tab][/tab] 
         """
         logging.info("\nReplacing discourse markdown syntax...")
@@ -159,13 +158,14 @@ class SphinxHandler:
     def replace_href_anchors(self):
         """
         Replaces headings with manual href anchors with normal markdown headings.
+        
         Example input: <a href="#heading--parameters"><h2 id="heading--parameters"> Set parameters </h2></a>
         Example output: ## Set parameters
 
         Returns
         -------
         bool
-            True if any changes were made, False otherwise
+            True if any changes were made
         """
         logging.info("\nUpdating headings with href anchors...")
         any_changes = False
@@ -198,6 +198,15 @@ class SphinxHandler:
         return any_changes
 
     def __link_replacement(self, match):
+        """
+        Finds the item in self.discourse_docs that corresponds to the given topic ID, and returns the absolute path
+        to the corresponding local file.
+
+        Returns
+        -------
+        str
+            New hyperlink including the text and path.
+        """
         text = match.group(1)
         topic_id = match.group(2)
         
