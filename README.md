@@ -154,6 +154,13 @@ Reason: This is probably because that anchor used to reference a manually create
 
 Fix: Manually replace that link with an anchor that corresponds to the actual name of the heading. See [this internal document](https://docs.google.com/document/d/1g56unMuhh5RcgfYew2c3AEClaBjYD9L5toF5xn3F5WY/edit?tab=t.0#heading=h.evr6ovkd4cbp) for more help finguring out the right heading anchor.
 
+Another option is to create a custom MyST anchor associated to that heading: 
+```
+(my-custom-myst-anchor)=
+## Some section
+```
+This would be referenced in any page as `See [some section](#my-custom-myst-anchor)`
+
 **Invalid topic ID**
 ```shell
 WARNING: 'myst' cross-reference target not found: ''
