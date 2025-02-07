@@ -92,10 +92,16 @@ def parse_discourse_navigation_table(index_topic_markdown: str, search=True) -> 
     # Remove row after heading ("|---|---|---|")
     rows = rows[1:]
 
-    navigation_table: list[dict[str, str]] = [
-        {key.strip(): value.strip() for key, value in row.items() if key != ""}
-        for row in rows
-    ]
+    navigation_table = []
+    for row in rows:
+        cleaned_row = {}
+        for key, value in row.items():
+            if key != "" and value:
+                cleaned_row[key.strip()] = value.strip()
+            elif not value:
+                continue
+            
+        navigation_table.append(cleaned_row)
     
     return navigation_table
 
@@ -172,6 +178,9 @@ class DiscourseItem:
     isTopic = True
 
     def __init__(self, navtable_row: dict, configuration) -> None:
+        if not navtable_row:
+            self.isValid = False
+            return
 
         self.config = configuration
 
