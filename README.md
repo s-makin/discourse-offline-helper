@@ -168,7 +168,9 @@ WARNING: 'myst' cross-reference target not found: '/'
 ```
 Reason: The Discourse link (`/t/123`) references a page that is not in that documentation set's navtable, so the script doesn't know about it.
 
-Fix: Manually replace the reference with the full URL (`https://discourse.../t/123`).
+Fix: If this page is NOT part of your documentation set, manually replace the reference in the Sphinx doc with the full URL (`https://discourse.../t/123`).
+
+If this page IS part of your documentation set but is not included in the navigation table, then you must either include it there or use a custom navtable (see the [argument descriptions](try-it-on-other-docs)) so that when you re-run the tool, the page is downloaded and all references to it are correctly replaced.
 
 ## Contribute
 
