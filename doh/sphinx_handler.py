@@ -246,7 +246,7 @@ class SphinxHandler:
         """
         logging.info("\nGenerating toctrees for index files...")
 
-        toctree_directives = f"\n```{{toctree}}\n:titlesonly:\n:maxdepth: 2\n:glob:\n\n"
+        toctree_directives = f"\n```{{toctree}}\n:titlesonly:\n:maxdepth: 2\n:glob:\n:hidden:\n\n"
         for item in self._discourse_docs._items:
             if item.title == 'index' or item.isHomeTopic:
                 if item.isHomeTopic:
