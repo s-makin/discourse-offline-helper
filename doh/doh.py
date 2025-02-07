@@ -45,7 +45,7 @@ def launch():
     # if os.path.exists(args.docs_directory):
     #     shutil.rmtree(args.docs_directory)
         
-    # Download and process a Discourse documentation set
+    # Step 1: Download and process a Discourse documentation set
     discourse_docs = None
     if args.navtable:
         navtable = ""
@@ -59,11 +59,14 @@ def launch():
     discourse_docs.calculate_filepaths() # calculate local file paths
     discourse_docs.download() # download raw markdown files from Discourse
 
-    # Convert local discourse docs to a Sphinx/RTD-compatible format (markdown only)
+    # Step 2: Convert local discourse docs to a Sphinx/RTD-compatible format (markdown only)
     sphinx_docs = SphinxHandler(discourse_docs, config)
 
     sphinx_docs.update_index_pages() # create or rename landing pages as index files
+
+    sphinx_docs.replace_href_anchors() # replace headings with <a href=...
     sphinx_docs.update_links() # replace discourse links with local file paths
+
     sphinx_docs.replace_discourse_metadata(truncate_comments=True) # remove timestamp and comments, adds h1 headings.
     sphinx_docs.replace_discourse_notes() # replace [note] admonitions
     sphinx_docs.generate_tocs() # generate toctree for each index file

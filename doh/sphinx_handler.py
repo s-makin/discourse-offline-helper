@@ -81,7 +81,6 @@ class SphinxHandler:
         -----
         The following replacements are made:
         - `[note]` and `[/note]` -> ```{note}``` for default, caution, information, and positive notes.
-        - TODO: <href> anchors
         - TODO: [tab][/tab] 
         """
         logging.info("\nReplacing discourse markdown syntax...")
@@ -147,9 +146,67 @@ class SphinxHandler:
 
                     self._discourse_docs._items.append(new_item)
 
-                    logging.info(f"Created {index_file}.")
+                    logging.debug(f"Created {index_file}.")
+
+    def __href_heading_replacement(self, line):
+        pattern = r'<a href="#[^"]*"><(h[1-6]) id="[^"]*">\s*(.*?)\s*</\1></a>'
+        new_line = re.sub(pattern, lambda m: f"{'#' * int(m.group(1)[1])} {m.group(2)}", line)
+
+        line_changed = new_line != line
+        return new_line, line_changed
+
+    def replace_href_anchors(self):
+        """
+        Replaces headings with manual href anchors with normal markdown headings.
+        
+        Example input: <a href="#heading--parameters"><h2 id="heading--parameters"> Set parameters </h2></a>
+        Example output: ## Set parameters
+
+        Returns
+        -------
+        bool
+            True if any changes were made
+        """
+        logging.info("\nUpdating headings with href anchors...")
+        any_changes = False
+        
+        for item in self._discourse_docs._items:
+            if item.isTopic:
+                lines = []
+                if not item.filepath.with_suffix('.md').exists():
+                    logging.error(f"ERROR: File {item.filepath} not found. Exiting program")
+                    sys.exit(1)
+                with open(item.filepath.with_suffix('.md'), 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+
+                updated_lines = []
+                file_changed = False
+                
+                for line in lines:
+                    new_line, line_changed = self.__href_heading_replacement(line) # replace HTML with markdown heading
+                    new_line = new_line.replace('#heading--', '#') # remove prefix in links that start with '#heading--'
+
+                    updated_lines.append(new_line)
+                    file_changed = file_changed or line_changed or line != new_line
+
+                if file_changed:
+                    logging.debug(f"Replaced href anchor headings in {item.filepath}")
+                    any_changes = True
+                    with open(item.filepath.with_suffix('.md'), 'w', encoding='utf-8') as f:
+                        f.writelines(updated_lines)
+
+        return any_changes
 
     def __link_replacement(self, match):
+        """
+        Finds the item in self.discourse_docs that corresponds to the given topic ID, and returns the absolute path
+        to the corresponding local file.
+
+        Returns
+        -------
+        str
+            New hyperlink including the text and path.
+        """
         text = match.group(1)
         topic_id = match.group(2)
         
@@ -175,7 +232,7 @@ class SphinxHandler:
                     lines = f.readlines()
 
                 updated_lines = []
-                pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)\)"
+                pattern = r"\[([^\]]+)]\(/t/[^)]*?(\d+)[^)]*\)"
                 for line in lines:
                     new_line = re.sub(pattern, self.__link_replacement, line)
                     updated_lines.append(new_line)
@@ -189,17 +246,17 @@ class SphinxHandler:
         """
         logging.info("\nGenerating toctrees for index files...")
 
-        toctree_directives = f"\n```{{toctree}}\n:hidden:\n:titlesonly:\n:maxdepth: 2\n:glob:\n\n"
+        toctree_directives = f"\n```{{toctree}}\n:titlesonly:\n:maxdepth: 2\n:glob:\n\n"
         for item in self._discourse_docs._items:
             if item.title == 'index' or item.isHomeTopic:
                 if item.isHomeTopic:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
                         f.write(toctree_directives)
                         f.write("Home <self>\n")
-                        f.write("/tutorial*/index\n")
-                        f.write("/how*/index\n")
-                        f.write("/reference*/index\n")
-                        f.write("/explanation*/index\n")
+                        f.write("tutorial*/index\n")
+                        f.write("how*/index\n")
+                        f.write("reference*/index\n")
+                        f.write("explanation*/index\n")
                         f.write("*\n")
                 else:
                     with open(item.filepath.with_suffix('.md'), 'a', encoding='utf-8') as f:
@@ -207,5 +264,5 @@ class SphinxHandler:
                         f.write("*\n")
                         f.write("*/index\n")
 
-                print(f"Created toctree for {item.filepath}")
+                logging.debug(f"Created toctree for {item.filepath}")
 
